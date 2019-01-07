@@ -7,3 +7,5 @@
 /Identity Service/obj
 /Identity Service/appsettings.json
 /Identity Service/bin/Debug/netcoreapp2.2
+/Identity Service/.vs/Identity Service/DesignTimeBuild
+/Identity Service.sln.DotSettings.user
