@@ -3,3 +3,7 @@
 ################################################################################
 
 /.vs
+/Identity Service/.vs/Identity Service/v15/Server/sqlite3
+/Identity Service/obj
+/Identity Service/appsettings.json
+/Identity Service/bin/Debug/netcoreapp2.2
