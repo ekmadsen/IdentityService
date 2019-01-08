@@ -2,7 +2,7 @@
 using System.Text;
 using ErikTheCoder.AspNetCore.Middleware;
 using ErikTheCoder.AspNetCore.Middleware.Settings;
-using ErikTheCoder.IdentityService.PasswordManagers;
+using ErikTheCoder.Identity.Service.PasswordManagers;
 using ErikTheCoder.Logging;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -14,7 +14,7 @@ using Microsoft.IdentityModel.Tokens;
 using EnvironmentName = ErikTheCoder.ServiceContract.EnvironmentName;
 
 
-namespace ErikTheCoder.IdentityService
+namespace ErikTheCoder.Identity.Service
 {
     public class Startup
     {

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Security.Cryptography;
 
 
-namespace ErikTheCoder.IdentityService.PasswordManagers
+namespace ErikTheCoder.Identity.Service.PasswordManagers
 {
     public class RngCryptoRfc2898 : IPasswordManager
     {

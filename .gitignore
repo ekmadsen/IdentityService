@@ -9,3 +9,10 @@
 /Identity Service/bin/Debug/netcoreapp2.2
 /Identity Service/.vs/Identity Service/DesignTimeBuild
 /Identity Service.sln.DotSettings.user
+/Contract/obj
+/Service/bin/Debug/netcoreapp2.2
+/Service/obj
+/Service/appsettings.json
+/Contract/bin
+/Service/bin/Release/netcoreapp2.2
+/Identity.sln.DotSettings.user

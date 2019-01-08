@@ -1,4 +1,4 @@
-﻿namespace ErikTheCoder.IdentityService.PasswordManagers
+﻿namespace ErikTheCoder.Identity.Service.PasswordManagers
 {
     public interface IPasswordManagerVersions
     {

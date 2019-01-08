@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Hosting;
 using Newtonsoft.Json.Linq;
 
 
-namespace ErikTheCoder.IdentityService
+namespace ErikTheCoder.Identity.Service
 {
     [UsedImplicitly]
     public static class Program

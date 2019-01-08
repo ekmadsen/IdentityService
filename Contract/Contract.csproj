@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>ErikTheCoder.Identity.Contract</RootNamespace>
+    <AssemblyName>ErikTheCoder.Identity.Contract</AssemblyName>
+    <Authors>Erik Madsen</Authors>
+    <Description>Refit proxy to call Identity service.</Description>
+    <Copyright>2019</Copyright>
+    <PackageProjectUrl>https://github.com/ekmadsen/IdentityService</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/ekmadsen/IdentityService</RepositoryUrl>
+    <RepositoryType>GitHub</RepositoryType>
+    <PackageTags>identity user-management credential-storage role-management</PackageTags>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Version>1.0.1</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="JetBrains.Annotations" Version="2018.2.1" />
+    <PackageReference Include="Refit" Version="4.6.58" />
+  </ItemGroup>
+
+</Project>

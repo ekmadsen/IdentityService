@@ -49,6 +49,11 @@
 	<s:String x:Key="/Default/CodeStyle/Naming/XamlNaming/UserRules/=NAMESPACE_005FALIAS/@EntryIndexedValue">&lt;Policy Inspect="True" Prefix="" Suffix="" Style="aaBb" /&gt;</s:String>
 	<s:String x:Key="/Default/CodeStyle/Naming/XamlNaming/UserRules/=XAML_005FFIELD/@EntryIndexedValue">&lt;Policy Inspect="True" Prefix="" Suffix="" Style="AaBb" /&gt;</s:String>
 	<s:String x:Key="/Default/CodeStyle/Naming/XamlNaming/UserRules/=XAML_005FRESOURCE/@EntryIndexedValue">&lt;Policy Inspect="True" Prefix="" Suffix="" Style="AaBb" /&gt;</s:String>
+	<s:Boolean x:Key="/Default/Environment/InjectedLayers/FileInjectedLayer/=4D9A8FC6C1ABB140BBCB9F354413EE5D/@KeyIndexDefined">True</s:Boolean>
+	<s:String x:Key="/Default/Environment/InjectedLayers/FileInjectedLayer/=4D9A8FC6C1ABB140BBCB9F354413EE5D/AbsolutePath/@EntryValue">C:\GitHub\Personal\Identity\Identity.sln.DotSettings</s:String>
+	<s:String x:Key="/Default/Environment/InjectedLayers/FileInjectedLayer/=4D9A8FC6C1ABB140BBCB9F354413EE5D/RelativePath/@EntryValue"></s:String>
+	<s:Boolean x:Key="/Default/Environment/InjectedLayers/InjectedLayerCustomization/=File4D9A8FC6C1ABB140BBCB9F354413EE5D/@KeyIndexDefined">True</s:Boolean>
+	<s:Double x:Key="/Default/Environment/InjectedLayers/InjectedLayerCustomization/=File4D9A8FC6C1ABB140BBCB9F354413EE5D/RelativePriority/@EntryValue">1</s:Double>
 	
 	
 	
@@ -101,14 +106,14 @@
 	
 	
 	
-	<s:Boolean x:Key="/Default/Environment/InjectedLayers/FileInjectedLayer/=D70743F9E50CCE4897C8332DFD9FB2ED/@KeyIndexDefined">True</s:Boolean>
-	<s:String x:Key="/Default/Environment/InjectedLayers/FileInjectedLayer/=D70743F9E50CCE4897C8332DFD9FB2ED/AbsolutePath/@EntryValue">C:\Users\Erik\Documents\Visual Studio 2017\Projects\IdentityService\Identity Service.sln.DotSettings</s:String>
-	<s:String x:Key="/Default/Environment/InjectedLayers/FileInjectedLayer/=D70743F9E50CCE4897C8332DFD9FB2ED/RelativePath/@EntryValue"></s:String>
 	
 	
 	
-	<s:Boolean x:Key="/Default/Environment/InjectedLayers/InjectedLayerCustomization/=FileD70743F9E50CCE4897C8332DFD9FB2ED/@KeyIndexDefined">True</s:Boolean>
-	<s:Double x:Key="/Default/Environment/InjectedLayers/InjectedLayerCustomization/=FileD70743F9E50CCE4897C8332DFD9FB2ED/RelativePriority/@EntryValue">2</s:Double>
+	
+	
+	
+	
+	
 	<s:String x:Key="/Default/Environment/PerformanceGuide/SwitchBehaviour/=AutoRecoverer/@EntryIndexedValue">LIVE_MONITOR</s:String>
 	<s:String x:Key="/Default/Environment/PerformanceGuide/SwitchBehaviour/=Format/@EntryIndexedValue">LIVE_MONITOR</s:String>
 	<s:String x:Key="/Default/Environment/PerformanceGuide/SwitchBehaviour/=Roslyn_002Dswea/@EntryIndexedValue">DO_NOTHING</s:String>
@@ -136,4 +141,6 @@
 	
 	
 	
-	<s:Boolean x:Key="/Default/UserDictionary/Words/=appsettings/@EntryIndexedValue">True</s:Boolean></wpf:ResourceDictionary>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=appsettings/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=forgotpassword/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=resetpassword/@EntryIndexedValue">True</s:Boolean></wpf:ResourceDictionary>
