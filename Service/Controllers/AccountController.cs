@@ -48,6 +48,7 @@ namespace ErikTheCoder.Identity.Service.Controllers
         {
             // Validate password against hash stored in database.
             var queryParameters = new { Request.Username };
+            // TODO: Also require account to be confirmed.
             const string query = @"
                 select u.id, u.Username, u.PasswordManagerVersion, u.Salt, u.PasswordHash, u.EmailAddress, u.FirstName, u.LastName
                 from Users u
