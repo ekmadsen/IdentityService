@@ -51,7 +51,7 @@ namespace ErikTheCoder.Identity.Service.Controllers
             // TODO: Also require account to be confirmed.
             const string query = @"
                 select u.id, u.Username, u.PasswordManagerVersion, u.Salt, u.PasswordHash, u.EmailAddress, u.FirstName, u.LastName
-                from Users u
+                from [Identity].Users u
                 where u.Username = @username
                 and u.Enabled = 1";
             User user;
@@ -111,7 +111,7 @@ namespace ErikTheCoder.Identity.Service.Controllers
                 Request.LastName
             };
             const string addUserQuery = @"
-                insert into Users (Username, Enabled, Confirmed, PasswordManagerVersion, Salt, PasswordHash, EmailAddress, FirstName, LastName)
+                insert into [Identity].Users (Username, Enabled, Confirmed, PasswordManagerVersion, Salt, PasswordHash, EmailAddress, FirstName, LastName)
                 output inserted.id
                 values (@username, 1, 0, @passwordManagerVersion, @salt, @passwordHash, @emailAddress, @firstName, @lastName)";
             int userId;
@@ -130,7 +130,7 @@ namespace ErikTheCoder.Identity.Service.Controllers
                 Sent = DateTime.Now
             };
             const string confirmationQuery = @"
-                insert into UserConfirmations (UserId, EmailAddress, Code, Sent)
+                insert into [Identity].UserConfirmations (UserId, EmailAddress, Code, Sent)
                 values (@userId, @emailAddress, @code, @sent)";
             using (SqlConnection connection = new SqlConnection(AppSettings.Database))
             {
@@ -182,7 +182,7 @@ namespace ErikTheCoder.Identity.Service.Controllers
             // TODO: Add expiration for confirmation code.
             const string confirmationQuery = @"
                 declare @userId int
-                update UserConfirmations
+                update [Identity].UserConfirmations
                 set Received = @received, @userId = UserId
                 where EmailAddress = @emailAddress
                 and Code = @code
@@ -196,7 +196,7 @@ namespace ErikTheCoder.Identity.Service.Controllers
                     // Update user in database.
                     var userQueryParameters = new { userId };
                     const string userQuery = @"
-                        update Users
+                        update [Identity].Users
                         set Confirmed = 1
                         where Id = @userId";
                     await connection.ExecuteAsync(userQuery, userQueryParameters);
@@ -223,9 +223,9 @@ namespace ErikTheCoder.Identity.Service.Controllers
             const string confirmationQuery = @"
                 declare @userId int
                 select @userId = u.Id
-                from Users u
+                from [Identity].Users u
                 where u.EmailAddress = @emailAddress
-                insert into UserConfirmations (UserId, EmailAddress, Code, Sent)
+                insert into [Identity].UserConfirmations (UserId, EmailAddress, Code, Sent)
                 values (@userId, @emailAddress, @code, @sent)";
             using (SqlConnection connection = new SqlConnection(AppSettings.Database))
             {
@@ -284,7 +284,7 @@ namespace ErikTheCoder.Identity.Service.Controllers
             // TODO: Add expiration for reset code.
             const string confirmationQuery = @"
                 declare @userId int
-                update UserConfirmations
+                update [Identity].UserConfirmations
                 set Received = @received, @userId = UserId
                 where EmailAddress = @emailAddress
                 and Code = @code
@@ -304,7 +304,7 @@ namespace ErikTheCoder.Identity.Service.Controllers
                         passwordHash
                     };
                     const string userQuery = @"
-                        update Users
+                        update [Identity].Users
                         set PasswordManagerVersion = @passwordManagerVersion, Salt = @salt, PasswordHash = @passwordHash
                         where Id = @userId";
                     await connection.ExecuteAsync(userQuery, userQueryParameters);
@@ -327,10 +327,7 @@ namespace ErikTheCoder.Identity.Service.Controllers
             ApplicationUser.Roles.Add("Admin");
             ApplicationUser.Roles.Add("Web Master");
             ApplicationUser.Roles.Add("Debugger");
-            foreach (string role in ApplicationUser.Roles)
-            {
-                Logger.Log(CorrelationId, $"{role} role");
-            }
+            foreach (string role in ApplicationUser.Roles) { Logger.Log(CorrelationId, $"{role} role"); }
         }
 
 

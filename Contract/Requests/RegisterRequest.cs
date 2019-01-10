@@ -1,12 +1,15 @@
-﻿namespace ErikTheCoder.Identity.Contract.Requests
+﻿using JetBrains.Annotations;
+
+
+namespace ErikTheCoder.Identity.Contract.Requests
 {
     public class RegisterRequest
 
     {
-        public string Username { get; set; }
-        public string Password { get; set; }
-        public string EmailAddress { get; set; }
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
+        [UsedImplicitly] public string Username { get; set; }
+        [UsedImplicitly] public string Password { get; set; }
+        [UsedImplicitly] public string EmailAddress { get; set; }
+        [UsedImplicitly] public string FirstName { get; set; }
+        [UsedImplicitly] public string LastName { get; set; }
     }
 }

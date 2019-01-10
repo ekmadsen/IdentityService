@@ -8,6 +8,8 @@ namespace ErikTheCoder.Identity.Contract
     [UsedImplicitly]
     public class User
     {
+        // ReSharper disable MemberCanBePrivate.Global
+        // ReSharper disable UnusedMember.Global
         public int Id { get; [UsedImplicitly] set; }
         public string Username { get; [UsedImplicitly] set; }
         public int PasswordManagerVersion { get; [UsedImplicitly] set; }
@@ -19,6 +21,8 @@ namespace ErikTheCoder.Identity.Contract
         public string DisplayName => $"{FirstName} {LastName}";
         public HashSet<string> Roles { get; [UsedImplicitly] set; }
         public string SecurityToken { get; set; }
+        // ReSharper restore UnusedMember.Global
+        // ReSharper restore MemberCanBePrivate.Global
 
 
         public User()
@@ -27,6 +31,7 @@ namespace ErikTheCoder.Identity.Contract
         }
 
 
+        [UsedImplicitly]
         public List<Claim> GetClaims()
         {
             List<Claim> claims = new List<Claim>
@@ -48,6 +53,7 @@ namespace ErikTheCoder.Identity.Contract
         }
 
 
+        [UsedImplicitly]
         public static User ParseClaims(IEnumerable<Claim> Claims)
         {
             User user = new User();

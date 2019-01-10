@@ -1,9 +1,12 @@
-﻿namespace ErikTheCoder.Identity.Contract.Requests
+﻿using JetBrains.Annotations;
+
+
+namespace ErikTheCoder.Identity.Contract.Requests
 {
     public class LoginRequest
 
     {
-        public string Username { get; set; }
-        public string Password { get; set; }
+        [UsedImplicitly] public string Username { get; set; }
+        [UsedImplicitly] public string Password { get; set; }
     }
 }

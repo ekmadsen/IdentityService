@@ -1,8 +1,12 @@
-﻿namespace ErikTheCoder.Identity.Contract.Requests
+﻿using JetBrains.Annotations;
+
+
+namespace ErikTheCoder.Identity.Contract.Requests
 {
+    [UsedImplicitly]
     public class ConfirmRequest
     {
-        public string EmailAddress { get; set; }
-        public string Code { get; set; }
+        [UsedImplicitly] public string EmailAddress { get; set; }
+        [UsedImplicitly] public string Code { get; set; }
     }
 }
