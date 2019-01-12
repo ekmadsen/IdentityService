@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Security.Claims;
+using ErikTheCoder.ServiceContract;
 using JetBrains.Annotations;
 
 
@@ -20,6 +21,7 @@ namespace ErikTheCoder.Identity.Contract
         public string LastName { get; set; }
         public string DisplayName => $"{FirstName} {LastName}";
         public HashSet<string> Roles { get; [UsedImplicitly] set; }
+        public Dictionary<string, HashSet<string>> Claims { get; [UsedImplicitly] set; }
         public string SecurityToken { get; set; }
         // ReSharper restore UnusedMember.Global
         // ReSharper restore MemberCanBePrivate.Global
@@ -28,6 +30,7 @@ namespace ErikTheCoder.Identity.Contract
         public User()
         {
             Roles = new HashSet<string>();
+            Claims = new Dictionary<string, HashSet<string>>();
         }
 
 
@@ -36,18 +39,18 @@ namespace ErikTheCoder.Identity.Contract
         {
             List<Claim> claims = new List<Claim>
             {
-                // Include standard claims.
+                // Include user properties.
                 new Claim(ClaimTypes.Name, Username),
                 new Claim(ClaimTypes.Email, EmailAddress),
-                // Include custom claims.
                 new Claim(CustomClaimType.FirstName, FirstName),
                 new Claim(CustomClaimType.LastName, LastName),
                 new Claim(CustomClaimType.SecurityToken, SecurityToken ?? string.Empty)
             };
-            // Include roles.
-            foreach (string role in Roles)
+            // Include roles and claims.
+            foreach (string role in Roles) claims.Add(new Claim(ClaimTypes.Role, role));
+            foreach ((string claimType, HashSet<string> claimValues) in Claims)
             {
-                claims.Add(new Claim(ClaimTypes.Role, role));
+                foreach (string claimValue in claimValues) claims.Add(new Claim(claimType, claimValue));
             }
             return claims;
         }

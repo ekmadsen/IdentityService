@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SqlClient;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Net.Mail;
-using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using Dapper;
@@ -13,11 +13,13 @@ using ErikTheCoder.AspNetCore.Middleware.Settings;
 using ErikTheCoder.Identity.Contract;
 using ErikTheCoder.Identity.Contract.Requests;
 using ErikTheCoder.Identity.Contract.Responses;
+using ErikTheCoder.Identity.Service.Entities;
 using ErikTheCoder.Identity.Service.PasswordManagers;
 using ErikTheCoder.Logging;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using Claim = System.Security.Claims.Claim;
 using ControllerBase = ErikTheCoder.AspNetCore.Middleware.ControllerBase;
 using User = ErikTheCoder.Identity.Contract.User;
 
@@ -47,7 +49,6 @@ namespace ErikTheCoder.Identity.Service.Controllers
         public async Task<User> LoginAsync([FromBody] LoginRequest Request)
         {
             // Validate password against hash stored in database.
-            var queryParameters = new { Request.Username };
             // TODO: Also require account to be confirmed.
             const string query = @"
                 select u.id, u.Username, u.PasswordManagerVersion, u.Salt, u.PasswordHash, u.EmailAddress, u.FirstName, u.LastName
@@ -58,20 +59,26 @@ namespace ErikTheCoder.Identity.Service.Controllers
             using (SqlConnection connection = new SqlConnection(AppSettings.Database))
             {
                 await connection.OpenAsync();
-                user = await connection.QuerySingleOrDefaultAsync<User>(query, queryParameters);
+                user = await connection.QuerySingleOrDefaultAsync<User>(query, Request);
                 if (user != null)
                 {
                     IPasswordManager passwordManager = _passwordManagerVersions[user.PasswordManagerVersion];
                     if (passwordManager.Validate(Request.Password, user.Salt, user.PasswordHash))
                     {
-                        // Password valid.
+                        // Password is valid.
                         Logger.Log(CorrelationId, $"{Request.Username} user authenticated.");
-                        AddRoles(connection, user);
+                        // Add roles, claims, and security token.
+                        List<Task> tasks = new List<Task>
+                        {
+                            AddRoles(connection, user),
+                            AddClaims(connection, user)
+                        };
+                        await Task.WhenAll(tasks);
                         AddSecurityToken(user);
                     }
                     else
                     {
-                        // Password invalid.
+                        // Password is invalid.
                         Logger.Log(CorrelationId, $"{Request.Username} user not authenticated.  {_invalidCredentials}");
                         user = null;
                     }
@@ -320,14 +327,42 @@ namespace ErikTheCoder.Identity.Service.Controllers
         }
 
 
-        private void AddRoles(SqlConnection Connection, User ApplicationUser)
+        private async Task AddRoles(IDbConnection Connection, User ApplicationUser)
         {
             Logger.Log(CorrelationId, $"Adding roles to {ApplicationUser.Username} User object.");
-            // TODO: Retrieve user roles from database.
-            ApplicationUser.Roles.Add("Admin");
-            ApplicationUser.Roles.Add("Web Master");
-            ApplicationUser.Roles.Add("Debugger");
-            foreach (string role in ApplicationUser.Roles) { Logger.Log(CorrelationId, $"{role} role"); }
+            const string query = @"
+                select r.Name
+                from [Identity].UserRoles ur
+                inner join [Identity].Users u on ur.UserId = u.Id
+                inner join [Identity].Roles r on ur.RoleId = r.Id
+                where u.Id = @id
+                order by r.Name asc";
+            IEnumerable<Role> roles = await Connection.QueryAsync<Role>(query, ApplicationUser);
+            foreach (Role role in roles)
+            {
+                Logger.Log(CorrelationId, $"{role} role");
+                ApplicationUser.Roles.Add(role.Name);
+            }
+        }
+
+
+        private async Task AddClaims(IDbConnection Connection, User ApplicationUser)
+        {
+            Logger.Log(CorrelationId, $"Adding claims to {ApplicationUser.Username} User object.");
+            const string query = @"
+                select c.[Type], uc.[Value]
+                from [Identity].UserClaims uc
+                inner join [Identity].Users u on uc.UserId = u.Id
+                inner join [Identity].Claims c on uc.ClaimId = c.Id
+                where u.Id = @id
+                order by c.[Type] asc, uc.[Value] asc";
+            IEnumerable<Entities.Claim> claims = await Connection.QueryAsync<Entities.Claim>(query, ApplicationUser);
+            foreach (Entities.Claim claim in claims)
+            {
+                Logger.Log(CorrelationId, $"Type = {claim.Type}, Value = {claim.Value} claim");
+                if (!ApplicationUser.Claims.ContainsKey(claim.Type)) ApplicationUser.Claims.Add(claim.Type, new HashSet<string>());
+                ApplicationUser.Claims[claim.Type].Add(claim.Value);
+            }
         }
 
 
