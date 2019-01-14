@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Security.Claims;
 using ErikTheCoder.ServiceContract;
 using JetBrains.Annotations;
@@ -29,8 +30,8 @@ namespace ErikTheCoder.Identity.Contract
 
         public User()
         {
-            Roles = new HashSet<string>();
-            Claims = new Dictionary<string, HashSet<string>>();
+            Roles = new HashSet<string>(StringComparer.CurrentCultureIgnoreCase);
+            Claims = new Dictionary<string, HashSet<string>>(StringComparer.CurrentCultureIgnoreCase);
         }
 
 
@@ -71,9 +72,6 @@ namespace ErikTheCoder.Identity.Contract
                     case ClaimTypes.Email:
                         user.EmailAddress = claim.Value;
                         break;
-                    case ClaimTypes.Role:
-                        user.Roles.Add(claim.Value);
-                        break;
                     case CustomClaimType.FirstName:
                         user.FirstName = claim.Value;
                         break;
@@ -82,6 +80,13 @@ namespace ErikTheCoder.Identity.Contract
                         break;
                     case CustomClaimType.SecurityToken:
                         user.SecurityToken = claim.Value;
+                        break;
+                    case ClaimTypes.Role:
+                        user.Roles.Add(claim.Value);
+                        break;
+                    default:
+                        if (!user.Claims.ContainsKey(claim.Type)) user.Claims.Add(claim.Type, new HashSet<string>(StringComparer.CurrentCultureIgnoreCase));
+                        user.Claims[claim.Type].Add(claim.Value);
                         break;
                 }
             }

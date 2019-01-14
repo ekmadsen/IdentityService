@@ -360,7 +360,7 @@ namespace ErikTheCoder.Identity.Service.Controllers
             foreach (Entities.Claim claim in claims)
             {
                 Logger.Log(CorrelationId, $"Type = {claim.Type}, Value = {claim.Value} claim");
-                if (!ApplicationUser.Claims.ContainsKey(claim.Type)) ApplicationUser.Claims.Add(claim.Type, new HashSet<string>());
+                if (!ApplicationUser.Claims.ContainsKey(claim.Type)) ApplicationUser.Claims.Add(claim.Type, new HashSet<string>(StringComparer.CurrentCultureIgnoreCase));
                 ApplicationUser.Claims[claim.Type].Add(claim.Value);
             }
         }
