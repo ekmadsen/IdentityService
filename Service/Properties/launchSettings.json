@@ -1,4 +1,4 @@
-﻿{
+{
   "iisSettings": {
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
@@ -10,6 +10,7 @@
   "profiles": {
     "Default": {
       "commandName": "IISExpress",
+      "ancmHostingModel": "OutOfProcess",
       "use64Bit": true
     }
   }
