@@ -16,3 +16,4 @@
 /Contract/bin
 /Service/bin/Release/netcoreapp2.2
 /Identity.sln.DotSettings.user
+/Service/Service.csproj.user
