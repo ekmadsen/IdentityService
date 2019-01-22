@@ -49,10 +49,7 @@ namespace ErikTheCoder.Identity.Contract
             };
             // Include roles and claims.
             foreach (string role in Roles) claims.Add(new Claim(ClaimTypes.Role, role));
-            foreach ((string claimType, HashSet<string> claimValues) in Claims)
-            {
-                foreach (string claimValue in claimValues) claims.Add(new Claim(claimType, claimValue));
-            }
+            foreach ((string claimType, HashSet<string> claimValues) in Claims) foreach (string claimValue in claimValues) claims.Add(new Claim(claimType, claimValue));
             return claims;
         }
 
