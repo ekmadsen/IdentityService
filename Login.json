@@ -1,0 +1,10 @@
+// https://dev.madpoker.net:44300/account/login
+
+//  User-Agent: Fiddler
+//  Host: dev.madpoker.net:44300
+//  Content-Type: application/json
+
+{
+  "Username": "username",
+  "Password": "password"
+}

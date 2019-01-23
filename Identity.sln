@@ -22,6 +22,17 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sql", "Sql", "{120BF7D8-7D6
 		GetUserRoles.sql = GetUserRoles.sql
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Json", "Json", "{A67D00F5-3D6A-4417-834D-462EC2A532C8}"
+	ProjectSection(SolutionItems) = preProject
+		Login.json = Login.json
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PowerShell", "PowerShell", "{AF18FCAD-DC79-4F48-A943-569938BEA345}"
+	ProjectSection(SolutionItems) = preProject
+		BindCertificateToIisExpress.ps1 = BindCertificateToIisExpress.ps1
+		CreateSelfSignedCertificates.ps1 = CreateSelfSignedCertificates.ps1
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -42,6 +53,8 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{120BF7D8-7D6E-43D3-999B-3CEAB2738EB4} = {5A6EE733-E629-4357-B3CC-981FB15FEEA0}
+		{A67D00F5-3D6A-4417-834D-462EC2A532C8} = {5A6EE733-E629-4357-B3CC-981FB15FEEA0}
+		{AF18FCAD-DC79-4F48-A943-569938BEA345} = {5A6EE733-E629-4357-B3CC-981FB15FEEA0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {152BC4D0-CEC2-4069-9061-65A750B57CF5}
