@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Primitives;
 using Microsoft.IdentityModel.Tokens;
 using EnvironmentName = ErikTheCoder.ServiceContract.EnvironmentName;
 
@@ -26,9 +27,22 @@ namespace ErikTheCoder.Identity.Service
         public void ConfigureServices(IServiceCollection Services)
         {
             Guid correlationId = Guid.NewGuid();
-            // Require authentication token.
-            // The token specifies the security algorithm used when it was signed.
-            Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(Options =>
+            // Require custom or JWT authentication token.
+            // The JWT token specifies the security algorithm used when it was signed (by Identity service).
+            Services.AddAuthentication(AuthenticationHandler.AuthenticationScheme).AddErikTheCoderAuthentication(Options =>
+            {
+                Options.Identities = Program.AppSettings.AuthenticationIdentities;
+                Options.ForwardDefaultSelector = HttpContext =>
+                {
+                    // Forward to JWT authentication if custom token is not present.
+                    string token = string.Empty;
+                    if (HttpContext.Request.Headers.TryGetValue(AuthenticationHandler.HttpHeaderName, out StringValues authorizationValues)) token = authorizationValues.ToString();
+                    return token.StartsWith(AuthenticationHandler.TokenPrefix)
+                        ? AuthenticationHandler.AuthenticationScheme
+                        : JwtBearerDefaults.AuthenticationScheme;
+                };
+            })
+            .AddJwtBearer(Options =>
             {
                 Options.TokenValidationParameters = new TokenValidationParameters
                 {
