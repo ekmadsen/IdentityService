@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using ErikTheCoder.Identity.Contract.Requests;
 using ErikTheCoder.Identity.Contract.Responses;
+using ErikTheCoder.ServiceContract;
 using JetBrains.Annotations;
 using Refit;
 

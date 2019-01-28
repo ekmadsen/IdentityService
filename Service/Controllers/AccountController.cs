@@ -16,12 +16,12 @@ using ErikTheCoder.Identity.Contract.Responses;
 using ErikTheCoder.Identity.Service.Entities;
 using ErikTheCoder.Identity.Service.PasswordManagers;
 using ErikTheCoder.Logging;
+using ErikTheCoder.ServiceContract;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Claim = System.Security.Claims.Claim;
 using ControllerBase = ErikTheCoder.AspNetCore.Middleware.ControllerBase;
-using User = ErikTheCoder.Identity.Contract.User;
 
 
 namespace ErikTheCoder.Identity.Service.Controllers
