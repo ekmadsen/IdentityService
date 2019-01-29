@@ -22,7 +22,7 @@
   <ItemGroup>
     <PackageReference Include="ErikTheCoder.ServiceContract" Version="1.0.4-beta.1" />
     <PackageReference Include="JetBrains.Annotations" Version="2018.3.0" />
-    <PackageReference Include="Refit" Version="4.6.58" />
+    <PackageReference Include="Refit" Version="4.6.30" />
   </ItemGroup>
 
 </Project>
