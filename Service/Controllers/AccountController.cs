@@ -92,9 +92,6 @@ namespace ErikTheCoder.Identity.Service.Controllers
         [HttpPost("register")]
         public async Task<RegisterResponse> RegisterAsync([FromBody] RegisterRequest Request)
         {
-            throw new Exception("Kaboom!");
-
-
             // TODO: Validate email address and username are available.
             // TODO: Run multiple SQL insert statements in a transaction.  Rollback if an exception occurs.
             // Validate password meets complexity requirements.

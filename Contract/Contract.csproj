@@ -12,7 +12,7 @@
     <RepositoryType>GitHub</RepositoryType>
     <PackageTags>identity user-management credential-storage role-management</PackageTags>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.5-beta.5</Version>
+    <Version>1.0.5</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -20,7 +20,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="ErikTheCoder.ServiceContract" Version="1.0.4-beta.1" />
+    <PackageReference Include="ErikTheCoder.ServiceContract" Version="1.0.4" />
     <PackageReference Include="JetBrains.Annotations" Version="2018.3.0" />
     <PackageReference Include="Refit" Version="4.6.30" />
   </ItemGroup>
