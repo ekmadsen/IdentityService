@@ -6,9 +6,11 @@ using ErikTheCoder.Identity.Service.PasswordManagers;
 using ErikTheCoder.Logging;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Primitives;
 using Microsoft.IdentityModel.Tokens;
@@ -54,10 +56,11 @@ namespace ErikTheCoder.Identity.Service
                     ClockSkew = TimeSpan.FromMinutes(_clockSkewMinutes)
                 };
             });
-            // Require authorization (permission to access controller actions) using custom claims.
-            Services.AddAuthorization(Options => Options.UseErikTheCoderPolicies());
-            // Add MVC and configure routing.
-            Services.AddMvc().AddJsonOptions(Options => Options.SerializerSettings.ContractResolver = new Newtonsoft.Json.Serialization.DefaultContractResolver()); // Preserve case of property names.
+            // Add MVC, filters, policies, and configure routing.
+            IMvcBuilder mvcBuilder = Services.AddMvc();
+            mvcBuilder.AddMvcOptions(Options => Options.Filters.Add(new AuthorizeFilter(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build()))); // Require authorization (permission to access controller actions).
+            Services.AddAuthorization(Options => Options.UseErikTheCoderPolicies()); // Authorize using policies that examine claims.
+            mvcBuilder.AddJsonOptions(Options => Options.SerializerSettings.ContractResolver = new Newtonsoft.Json.Serialization.DefaultContractResolver()); // Preserve case of property names.
             Services.AddRouting(Options => Options.LowercaseUrls = true);
             // Don't use memory cache in services.  Use it in website instead to avoid two network I/O hops:
             //   Website -> Service -> Database

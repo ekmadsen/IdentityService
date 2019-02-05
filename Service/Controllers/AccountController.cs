@@ -44,16 +44,15 @@ namespace ErikTheCoder.Identity.Service.Controllers
 
         // Access ASP.NETCore's Request property via this.Request.
         // ReSharper disable ParameterHidesMember
-        [AllowAnonymous]
         [HttpPost("login")]
         public async Task<User> LoginAsync([FromBody] LoginRequest Request)
         {
             // Validate password against hash stored in database.
-            // TODO: Also require account to be confirmed.
             const string query = @"
                 select u.id, u.Username, u.PasswordManagerVersion, u.Salt, u.PasswordHash, u.EmailAddress, u.FirstName, u.LastName
                 from [Identity].Users u
                 where u.Username = @username
+                and u.Confirmed = 1
                 and u.Enabled = 1";
             User user;
             using (SqlConnection connection = new SqlConnection(AppSettings.Database))
@@ -88,7 +87,6 @@ namespace ErikTheCoder.Identity.Service.Controllers
         }
 
 
-        [AllowAnonymous]
         [HttpPost("register")]
         public async Task<RegisterResponse> RegisterAsync([FromBody] RegisterRequest Request)
         {
@@ -153,7 +151,7 @@ namespace ErikTheCoder.Identity.Service.Controllers
                 email.To.Add(new MailAddress(Request.EmailAddress));
                 email.Subject = "account activation";
                 // TODO: Use MVC routing to create email confirmation hyperlink.
-                string confirmationUrl = string.Format(AppSettings.Email.ConfirmationUrl, Request.EmailAddress, code);
+                string confirmationUrl = string.Format(AppSettings.Account.ConfirmationUrl, Request.EmailAddress, code);
                 email.Body = $"Click {confirmationUrl} to confirm your email address.";
                 using (SmtpClient smtpClient = new SmtpClient
                 {
@@ -174,7 +172,6 @@ namespace ErikTheCoder.Identity.Service.Controllers
         }
 
 
-        [AllowAnonymous]
         [HttpPost("confirm")]
         public async Task ConfirmAsync([FromBody] ConfirmRequest Request)
         {
@@ -213,7 +210,6 @@ namespace ErikTheCoder.Identity.Service.Controllers
         }
 
 
-        [AllowAnonymous]
         [HttpPost("forgotpassword")]
         public async Task ForgotPasswordAsync([FromBody] ForgotPasswordRequest Request)
         {
@@ -248,8 +244,8 @@ namespace ErikTheCoder.Identity.Service.Controllers
                 email.To.Add(new MailAddress(Request.EmailAddress));
                 email.Subject = "password reset";
                 // TODO: Use MVC routing to create email confirmation hyperlink.
-                string confirmationUrl = string.Format(AppSettings.Email.ConfirmationUrl, Request.EmailAddress, code);
-                email.Body = $"Click {confirmationUrl} to reset your password.";
+                string resetUrl = string.Format(AppSettings.Account.ResetUrl, Request.EmailAddress, code);
+                email.Body = $"Click {resetUrl} to reset your password.";
                 using (SmtpClient smtpClient = new SmtpClient
                 {
                     Host = AppSettings.Email.Host,
@@ -264,7 +260,6 @@ namespace ErikTheCoder.Identity.Service.Controllers
         }
 
 
-        [AllowAnonymous]
         [HttpPost("resetpassword")]
         public async Task<ResetPasswordResponse> ResetPasswordAsync([FromBody] ResetPasswordRequest Request)
         {

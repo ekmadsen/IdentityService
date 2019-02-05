@@ -7,6 +7,7 @@ namespace ErikTheCoder.Identity.Service.PasswordManagers
     {
         public PasswordManagerVersions()
         {
+            // TODO: Move password manager configuration to appSettings.json.
             // Add all versions.
             // ReSharper disable ArgumentsStyleLiteral
             Add(1, new RngCryptoRfc2898(
