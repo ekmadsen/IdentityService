@@ -48,11 +48,16 @@ Services.AddSingleton(typeof(ILogger), logger);
 Services.AddSingleton(typeof(IAccountService), accountService);
 ```
 
-In the above code I use a custom authentication token.  See the [Usage](https://github.com/ekmadsen/AspNetCore.Middleware#usage) section of my AspNetCore.Middleware documentation for an explanation of custom authentication tokens.  Also, this code uses my [ServiceProxy](https://github.com/ekmadsen/ServiceProxy) solution to generate Refit service proxies that automatically pass authentication tokens and logging correlation IDs.
+In the above code I use a custom authentication token.  See the [Usage](https://github.com/ekmadsen/AspNetCore.Middleware#usage) section of my AspNetCore.Middleware documentation for an explanation of custom authentication tokens.  Also, the above code uses my [ServiceProxy](https://github.com/ekmadsen/ServiceProxy) solution to generate Refit service proxies that automatically pass authentication tokens and logging correlation IDs.
 
-In an ASP.NET Core MVC website's authetication controller, write a login action:
+In an ASP.NET Core MVC website's authetication controller, write a Login action:
 
 ```C#
+[AllowAnonymous]
+[HttpGet]
+public ViewResult Login(string ReturnUrl) => View(new LoginModel(ReturnUrl));
+
+
 [AllowAnonymous]
 [HttpPost]
 public async Task<IActionResult> Login(LoginModel Model)
@@ -83,6 +88,78 @@ public async Task<IActionResult> Login(LoginModel Model)
 }
 ```
 
+Write a Logout action:
+
+```C#
+[AllowAnonymous]
+[HttpGet]
+public async Task<ViewResult> Logout()
+{
+    await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+    Logger.Log(CorrelationId, $"{GetCallingUsername()} user logged out.");
+    return View();
+}
+```
+
+Write a Register action that allows user to register an account:
+
+```C#
+[AllowAnonymous]
+[HttpGet]
+public ViewResult Register() =>  View(new RegisterModel());
+
+
+[AllowAnonymous]
+[HttpPost]
+public async Task<IActionResult> Register(RegisterModel Model)
+{
+    RegisterRequest request = new RegisterRequest
+    {
+        Username = Model.Username,
+        Password = Model.Password,
+        EmailAddress = Model.EmailAddress,
+        FirstName = Model.FirstName,
+        LastName =  Model.LastName
+    };
+    RegisterResponse response = await _accountService.RegisterAsync(request);
+    if (!response.PasswordValid)
+    {
+        // Password does not meet complexity requirements.
+        string message = string.Join(Environment.NewLine, response.Messages);
+        ModelState.AddModelError(nameof(Model.Password), message);
+        return View(Model);
+    }
+    return RedirectToAction(nameof(Confirm));
+}
+```
+
+Write a Confirm action that verifies the user posseses the email address they provided:
+
+```C#
+[AllowAnonymous]
+[HttpGet("/account/confirm")]
+public ViewResult ConfirmGet(ConfirmModel Model) => View("Confirm", Model);
+
+
+[AllowAnonymous]
+[HttpPost]
+public async Task<IActionResult> Confirm(ConfirmModel Model)
+{
+    ConfirmRequest request = new ConfirmRequest
+    {
+        EmailAddress = Model.EmailAddress,
+        Code = Model.Code
+    };
+    await _accountService.ConfirmAsync(request);
+    return RedirectToAction(nameof(Activated));
+}
+```
+
+Write a ForgotPassword action:
+
+```C#
+
+```
 
 #  Benefits # 
 
