@@ -23,8 +23,10 @@ I was motivated to write my own Identity service for the following reasons.
 
 # Installation #
 
-1.  Use Visual Studio to build this solution then deploy it to an [IIS](https://docs.microsoft.com/en-us/aspnet/core/host-and-deploy/iis/?view=aspnetcore-2.2) or [Azure](https://docs.microsoft.com/en-us/aspnet/core/host-and-deploy/azure-apps/?view=aspnetcore-2.2) host.
-2.  Reference this service in your web application via its [NuGet package](https://www.nuget.org/packages/ErikTheCoder.Identity.Contract/).
+* Use SQL Server Management Studio to locate an existing database or create a new database.
+* Run the [CreateDatabase.sql](https://github.com/ekmadsen/IdentityService/blob/master/CreateDatabase.sql) script to create the tables and views used by this solution. The script creates SQL objects in an "Identity" schema. Obviously, if you install this solution in a dedicated database there's no risk of colliding with the names of existing SQL objects. However, if you install this solution in an existing database the schema minimizes the risk of colliding with existing SQL objects.
+* Use Visual Studio to build this solution then deploy it to an [IIS](https://docs.microsoft.com/en-us/aspnet/core/host-and-deploy/iis/?view=aspnetcore-2.2) or [Azure](https://docs.microsoft.com/en-us/aspnet/core/host-and-deploy/azure-apps/?view=aspnetcore-2.2) host.
+* Reference this service in your web application via its [NuGet package](https://www.nuget.org/packages/ErikTheCoder.Identity.Contract/).
 
 
 # Usage #
