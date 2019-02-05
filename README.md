@@ -33,7 +33,56 @@ I was motivated to write my own Identity service for the following reasons.
 
 Call the Identity service in your solution via an [IAccountService](https://github.com/ekmadsen/IdentityService/blob/master/Contract/IAccountService.cs)-typed [Refit](https://www.nuget.org/packages/Refit/) proxy.  See the [Refit GitHub site](https://github.com/reactiveui/refit) for an explanation of how to use Refit proxies and a detailed description of Refit's features and benefits.  In short, Refit provides strongly-typed C# classes for invoking service methods, whether you own (have source code for) the service endpoint or not.  It in no way precludes writing dynamically-typed javaScript code (such as AJAX) to invoke the same service methods.  It provides the best of both worlds: strongly-typed server-to-server calls and dynamically-typed browser-to-server calls.
 
+In Startup.ConfigureServices, create a service proxy and inject the dependency.  
+
+```C#
+// Create service proxies.
+Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+IHttpContextAccessor httpContextAccessor = Services.BuildServiceProvider().GetRequiredService<IHttpContextAccessor>();
+string accountServiceUrl = Program.AppSettings.ServiceProxies[Keys.IdentityServiceName].Url;
+string accountServiceToken = Program.AppSettings.ServiceProxies[Keys.IdentityServiceName].Token;
+IAccountService accountService = Proxy.For<IAccountService>(accountServiceUrl, accountServiceToken, () => httpContextAccessor.HttpContext.GetCorrelationId());
+// Configure dependency injection.
+Services.AddSingleton(typeof(IAppSettings), Program.AppSettings);
+Services.AddSingleton(typeof(ILogger), logger);
+Services.AddSingleton(typeof(IAccountService), accountService);
+```
+
+In the above code I use a custom authentication token.  See the [Usage](https://github.com/ekmadsen/AspNetCore.Middleware#usage) section of my AspNetCore.Middleware documentation for an explanation of custom authentication tokens.  Also, this code uses my [ServiceProxy](https://github.com/ekmadsen/ServiceProxy) solution to generate Refit service proxies that automatically pass authentication tokens and logging correlation IDs.
+
+In an ASP.NET Core MVC website's authetication controller, write a login action:
+
+```C#
+[AllowAnonymous]
+[HttpPost]
+public async Task<IActionResult> Login(LoginModel Model)
+{
+    LoginRequest request = new LoginRequest
+    {
+        Username = Model.Username,
+        Password = Model.Password
+    };
+    User user = await _accountService.LoginAsync(request);
+    if (user is null)
+    {
+        // Credentials are invalid.
+        Logger.Log(CorrelationId, $"{Model.Username} user not authenticated.  {_invalidCredentialsMessage}");
+        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        ModelState.AddModelError(nameof(Model.Username), _invalidCredentialsMessage);
+        return View(Model);
+    }
+    // Credentials are valid.
+    // Create claims principal.
+    ClaimsIdentity identity = new ClaimsIdentity(user.GetClaims(), CookieAuthenticationDefaults.AuthenticationScheme);
+    ClaimsPrincipal principal = new ClaimsPrincipal(identity);
+    // Persist claims principal in HTTP cookie.
+    AuthenticationProperties authenticationProperties = new AuthenticationProperties {IsPersistent = Model.RememberMe};
+    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal, authenticationProperties);
+    Logger.Log(CorrelationId, $"{Model.Username} user authenticated.");
+    return Redirect(Model.ReturnUrl ?? "/");
+}
+```
+
 
 #  Benefits # 
-
 
