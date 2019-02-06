@@ -150,6 +150,7 @@ public async Task<IActionResult> Confirm(ConfirmModel Model)
         EmailAddress = Model.EmailAddress,
         Code = Model.Code
     };
+    // TODO: Handle case where user provides incorrect confirmation code.
     await _accountService.ConfirmAsync(request);
     return RedirectToAction(nameof(Activated));
 }
