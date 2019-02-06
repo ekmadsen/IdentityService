@@ -340,4 +340,4 @@ Decrypted JWT token:
 M�@˲�UԢ]�b��G
 ```
 
-If these claims are altered by a malicious client to attempt an elevation-of-privilege attack, the client will receive an unauthorized HTTP 401 Unauthorized exception.  Why?  Because the JWT authentication handler in the Identity service hashes the claims using a secret key known only to the Identity service (never transmitted to the client), determines it does not match the binaary hash contained in the JWT token (the scrambled characters above), and concludes the JWT token has been tampered with.
+If these claims are altered by a malicious client to attempt an elevation-of-privilege attack, the client will receive an unauthorized HTTP 401 Unauthorized exception.  Why?  Because the JWT authentication handler in the Identity service hashes the claims using a secret key known only to the Identity service (never transmitted to the client), determines it does not match the binary hash contained in the JWT token (the scrambled characters above), and concludes the JWT token has been tampered with.
