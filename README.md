@@ -120,7 +120,7 @@ public async Task<ViewResult> Logout()
 }
 ```
 
-Write a Register action that allows user to register an account:
+Write a Register action that enables a user to register an account:
 
 ```C#
 [AllowAnonymous]
@@ -152,7 +152,7 @@ public async Task<IActionResult> Register(RegisterModel Model)
 }
 ```
 
-Write a Confirm action that verifies the user posseses the email address they provided:
+Write a Confirm action that verifies a user posseses the email address they provided:
 
 ```C#
 [AllowAnonymous]
