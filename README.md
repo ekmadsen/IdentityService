@@ -33,7 +33,7 @@ I was motivated to write my own Identity service for the following reasons.
 
 Call the Identity service in your solution via an [IAccountService](https://github.com/ekmadsen/IdentityService/blob/master/Contract/IAccountService.cs)-typed [Refit](https://www.nuget.org/packages/Refit/) proxy.  See the [Refit GitHub site](https://github.com/reactiveui/refit) for an explanation of how to use Refit proxies and a detailed description of Refit's features and benefits.  In short, Refit provides strongly-typed C# classes for invoking service methods, whether you own (have source code for) the service endpoint or not.  It in no way precludes writing dynamically-typed javaScript code (such as AJAX) to invoke the same service methods.  It provides the best of both worlds: strongly-typed server-to-server calls and dynamically-typed browser-to-server calls.
 
-In Startup.ConfigureServices, create a service proxy and inject the dependency.  
+In Startup.ConfigureServices, create a service proxy and inject the dependency:
 
 ```C#
 // Create service proxies.
@@ -50,7 +50,7 @@ Services.AddSingleton(typeof(IAccountService), accountService);
 
 In the above code I use a custom authentication token.  See the [Usage](https://github.com/ekmadsen/AspNetCore.Middleware#usage) section of my AspNetCore.Middleware documentation for an explanation of custom authentication tokens.  Also, the above code uses my [ServiceProxy](https://github.com/ekmadsen/ServiceProxy) solution to generate Refit service proxies that automatically pass authentication tokens and logging correlation IDs.
 
-In an ASP.NET Core MVC website's authetication controller, write a Login action:
+In an ASP.NET Core MVC website's authentication controller, write a Login action:
 
 ```C#
 [AllowAnonymous]
@@ -158,8 +158,178 @@ public async Task<IActionResult> Confirm(ConfirmModel Model)
 Write a ForgotPassword action:
 
 ```C#
+[AllowAnonymous]
+[HttpGet("/account/forgotpassword")]
+public ViewResult ForgotPasswordGet(ForgotPasswordModel Model) => View("ForgotPassword", Model);
 
+
+[AllowAnonymous]
+[HttpPost]
+public async Task<IActionResult> ForgotPassword(ResetPasswordModel Model)
+{
+    ForgotPasswordRequest request = new ForgotPasswordRequest{ EmailAddress = Model.EmailAddress };
+    await _accountService.ForgotPasswordAsync(request);
+    return RedirectToAction(nameof(ResetPassword));
+}
 ```
+
+Write a ResetPassword action:
+
+```C#
+[AllowAnonymous]
+[HttpGet("/account/resetpassword")]
+public ViewResult ResetPasswordGet(ResetPasswordModel Model) => View("ResetPassword", Model);
+
+
+[AllowAnonymous]
+[HttpPost]
+public async Task<IActionResult> ResetPassword(ResetPasswordModel Model)
+{
+    ResetPasswordRequest request = new ResetPasswordRequest
+    {
+        EmailAddress = Model.EmailAddress,
+        Code = Model.Code,
+        NewPassword = Model.NewPassword
+    };
+    ResetPasswordResponse response = await _accountService.ResetPasswordAsync(request);
+    if (!response.PasswordValid)
+    {
+        // Password does not meet complexity requirements.
+        string message = string.Join(Environment.NewLine, response.Messages);
+        ModelState.AddModelError(nameof(Model.NewPassword), message);
+        return View(Model);
+    }
+    return RedirectToAction(nameof(PasswordReset));
+}
+```
+
 
 #  Benefits # 
 
+Leverage the Identity service to secure access to ASP.NET Core MVC and WebAPI controllers.
+
+Write custom policies:
+
+```C#
+using System.Collections.Generic;
+using ErikTheCoder.ServiceContract;
+using Microsoft.AspNetCore.Authorization;
+
+
+namespace ErikTheCoder.AspNetCore.Middleware
+{
+    public static class Policy
+    {
+        public const string Admin = "Admin";
+        public const string TheBigLebowski = "The Big Lebowski";
+        public const string Everyone = "Everyone";
+
+
+        // Include Admin role in all policies.
+        public static void VerifyAdmin(AuthorizationPolicyBuilder PolicyBuilder)
+        {
+            PolicyBuilder.RequireAssertion(Context =>
+            {
+                User user = User.ParseClaims(Context.User.Claims);
+                return user.Roles.Contains(Admin);
+            });
+        }
+
+
+        public static void VerifyTheBigLebowski(AuthorizationPolicyBuilder PolicyBuilder)
+        {
+            PolicyBuilder.RequireAssertion(Context =>
+            {
+                User user = User.ParseClaims(Context.User.Claims);
+                if (user.Claims.TryGetValue(CustomClaimType.Nickname, out HashSet<string> nicknames))
+                {
+                    if (nicknames.Contains("The Dude")) 
+                    {
+                        if (user.Claims.TryGetValue(CustomClaimType.Ability, out HashSet<string> abilities)) return abilities.Contains("Make White Russian") && abilities.Contains("Abide");
+                    }
+                }
+                return false;
+            });
+        }
+
+
+        public static void VerifyEveryone(AuthorizationPolicyBuilder PolicyBuilder) => PolicyBuilder.RequireAssertion(Context => true);
+    }
+}
+
+```
+
+Write an extension method to use the policies.
+
+```C#
+public static void UseErikTheCoderPolicies(this AuthorizationOptions AuthorizationOptions)
+{
+    AuthorizationOptions.AddPolicy(Policy.Admin, Policy.VerifyAdmin);
+    AuthorizationOptions.AddPolicy(Policy.TheBigLebowski, Policy.VerifyTheBigLebowski);
+    AuthorizationOptions.AddPolicy(Policy.Everyone, Policy.VerifyEveryone);
+}
+```
+
+In Startup.ConfigureServices, register the policies.
+
+```C#
+// Add MVC, filters, policies, and configure routing.
+IMvcBuilder mvcBuilder = Services.AddMvc();
+mvcBuilder.AddMvcOptions(Options => Options.Filters.Add(new AuthorizeFilter(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build()))); // Require authorization (permission to access controller actions).
+Services.AddAuthorization(Options => Options.UseErikTheCoderPolicies()); // Authorize using policies that examine claims.
+mvcBuilder.AddJsonOptions(Options => Options.SerializerSettings.ContractResolver = new Newtonsoft.Json.Serialization.DefaultContractResolver()); // Preserve case of property names.
+Services.AddRouting(Options => Options.LowercaseUrls = true);
+```
+
+
+Limit access to controllers using the Policy attribute on the controller class or controller method:
+
+```C#
+namespace ErikTheCoder.MadPoker.Website.Controllers
+{
+    [Authorize(Policy = Policy.Admin)]
+    public class AccountController : ControllerBase
+```
+
+In Razor views, pass the User.SecurityToken to JavaScript methods that call WebAPI service methods via AJAX.
+
+```JavaScript
+  // TODO: Add example code.
+```
+
+If you decrypt the security token using [Fiddler's](https://www.telerik.com/fiddler) TextWizard, you'll find the user's claims.
+
+Raw JWT token:
+```
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiZW1hZHNlbiIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL2VtYWlsYWRkcmVzcyI6InVzZXJuYW1lQHJlZGFjdGVkLmNvbSIsImh0dHBzOi8vc2NoZW1hLmVyaWt0aGVjb2Rlci5uZXQvY2xhaW1zL2ZpcnN0bmFtZSI6IkVyaWsiLCJodHRwczovL3NjaGVtYS5lcmlrdGhlY29kZXIubmV0L2NsYWltcy9sYXN0bmFtZSI6Ik1hZHNlbiIsImh0dHBzOi8vc2NoZW1hLmVyaWt0aGVjb2Rlci5uZXQvY2xhaW1zL3NlY3VyaXR5dG9rZW4iOiIiLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJBZG1pbiIsImh0dHBzOi8vc2NoZW1hLmVyaWt0aGVjb2Rlci5uZXQvY2xhaW1zL2FiaWxpdHkiOlsiQWJpZGUiLCJNYWtlIFdoaXRlIFJ1c3NpYW4iXSwiaHR0cHM6Ly9zY2hlbWEuZXJpa3RoZWNvZGVyLm5ldC9jbGFpbXMvbmlja25hbWUiOlsiRHVkZXJpbm8iLCJUaGUgRHVkZSJdLCJuYmYiOiIxNTQ5NDc0MzUwIiwiZXhwIjoiMTU4MTAxMDM1MCJ9.1eadtmU-sxenCO8t0cdtVwpNmEDLsr9V1KJdkmLI80c
+```
+
+Decrypted JWT token:
+```Json
+{
+    "alg": "HS256",
+    "typ": "JWT"
+}
+{
+    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name": "emadsen",
+    "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress": "username@redacted.com",
+    "https://schema.erikthecoder.net/claims/firstname": "Erik",
+    "https://schema.erikthecoder.net/claims/lastname": "Madsen",
+    "https://schema.erikthecoder.net/claims/securitytoken": "",
+    "http://schemas.microsoft.com/ws/2008/06/identity/claims/role": "Admin",
+    "https://schema.erikthecoder.net/claims/ability": [
+        "Abide",
+        "Make White Russian"
+    ],
+    "https://schema.erikthecoder.net/claims/nickname": [
+        "Duderino",
+        "The Dude"
+    ],
+    "nbf": "1549474350",
+    "exp": "1581010350"
+}
+�杶e>���-��mW
+M�@˲�UԢ]�b��G
+```
+
+If these claims are altered by a malicious client to attempt an elevation-of-privilege attack, the client will receive an unauthorized HTTP 401 Unauthorized exception.  Why?  Because the JWT authentication handler in the Identity service hashes the claims using a secret key known only to the Identity service (never transmitted to the client), determines it does not match the binaary hash contained in the JWT token (the scrambled characters above), and concludes the JWT token has been tampered with.
