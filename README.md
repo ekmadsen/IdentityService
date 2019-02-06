@@ -226,7 +226,6 @@ namespace ErikTheCoder.AspNetCore.Middleware
         public const string Everyone = "Everyone";
 
 
-        // Include Admin role in all policies.
         public static void VerifyAdmin(AuthorizationPolicyBuilder PolicyBuilder)
         {
             PolicyBuilder.RequireAssertion(Context =>
