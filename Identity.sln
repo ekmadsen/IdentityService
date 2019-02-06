@@ -15,13 +15,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Contract", "Contract\Contra
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Service", "Service\Service.csproj", "{EA5BDCEA-CE48-42EF-B53D-52BBAB067328}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sql", "Sql", "{120BF7D8-7D6E-43D3-999B-3CEAB2738EB4}"
-	ProjectSection(SolutionItems) = preProject
-		CreateDatabase.sql = CreateDatabase.sql
-		GetUserClaims.sql = GetUserClaims.sql
-		GetUserRoles.sql = GetUserRoles.sql
-	EndProjectSection
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Json", "Json", "{A67D00F5-3D6A-4417-834D-462EC2A532C8}"
 	ProjectSection(SolutionItems) = preProject
 		Login.json = Login.json
@@ -31,6 +24,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PowerShell", "PowerShell", 
 	ProjectSection(SolutionItems) = preProject
 		BindCertificateToIisExpress.ps1 = BindCertificateToIisExpress.ps1
 		CreateSelfSignedCertificates.ps1 = CreateSelfSignedCertificates.ps1
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sql", "Sql", "{CFFB5335-EA9C-4D38-8B84-7C8955729442}"
+	ProjectSection(SolutionItems) = preProject
+		CreateDatabase.sql = CreateDatabase.sql
 	EndProjectSection
 EndProject
 Global
@@ -52,9 +50,9 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{120BF7D8-7D6E-43D3-999B-3CEAB2738EB4} = {5A6EE733-E629-4357-B3CC-981FB15FEEA0}
 		{A67D00F5-3D6A-4417-834D-462EC2A532C8} = {5A6EE733-E629-4357-B3CC-981FB15FEEA0}
 		{AF18FCAD-DC79-4F48-A943-569938BEA345} = {5A6EE733-E629-4357-B3CC-981FB15FEEA0}
+		{CFFB5335-EA9C-4D38-8B84-7C8955729442} = {5A6EE733-E629-4357-B3CC-981FB15FEEA0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {152BC4D0-CEC2-4069-9061-65A750B57CF5}
