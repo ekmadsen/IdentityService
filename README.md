@@ -316,7 +316,7 @@ In Razor views, pass the User.SecurityToken to JavaScript methods that call WebA
   // TODO: Add example code.
 ```
 
-If you decrypt the security token using [Fiddler's](https://www.telerik.com/fiddler) TextWizard, you'll find the user's claims.
+If you decrypt the Base64-encoded security token (using [Fiddler's](https://www.telerik.com/fiddler) TextWizard), you'll find the user's claims.
 
 Raw JWT token (I've added line breaks):
 ```
