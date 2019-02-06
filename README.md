@@ -50,7 +50,26 @@ Services.AddSingleton(typeof(IAccountService), accountService);
 
 In the above code I use a custom authentication token.  See the [Usage](https://github.com/ekmadsen/AspNetCore.Middleware#usage) section of my AspNetCore.Middleware documentation for an explanation of custom authentication tokens.  Also, the above code uses my [ServiceProxy](https://github.com/ekmadsen/ServiceProxy) solution to generate Refit service proxies that automatically pass authentication tokens and logging correlation IDs.
 
-In an ASP.NET Core MVC website's authentication controller, write a Login action:
+In an ASP.NET Core MVC website's authentication controller, inject the IAccountService dependency:
+
+```C#
+namespace ErikTheCoder.MadPoker.Website.Controllers
+{
+    [Authorize(Policy = Policy.Admin)]
+    public class AccountController : ControllerBase
+    {
+        private const string _invalidCredentialsMessage = "Invalid username or password.";
+        private readonly IAccountService _accountService;
+
+
+        public AccountController(IAppSettings AppSettings, ILogger Logger, IAccountService AccountService) :
+            base(AppSettings, Logger)
+        {
+            _accountService = AccountService;
+        }
+```
+
+Write a Login action:
 
 ```C#
 [AllowAnonymous]
