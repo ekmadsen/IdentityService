@@ -1,4 +1,4 @@
-# IdentityService
+# IdentityService #
 Manages user registration, confirmation, credentials, roles, claims, and profile.
 
 
@@ -33,7 +33,7 @@ I was motivated to write my own Identity service for the following reasons.
 
 Call the Identity service in your solution via an [IAccountService](https://github.com/ekmadsen/IdentityService/blob/master/Contract/IAccountService.cs)-typed [Refit](https://www.nuget.org/packages/Refit/) proxy.  See the [Refit GitHub site](https://github.com/reactiveui/refit) for an explanation of how to use Refit proxies and a detailed description of Refit's features and benefits.  In short, Refit provides strongly-typed C# classes for invoking service methods, whether you own (have source code for) the service endpoint or not.  It in no way precludes writing dynamically-typed JavaScript code (such as AJAX) to invoke the same service methods.  It provides the best of both worlds: strongly-typed server-to-server calls and dynamically-typed browser-to-server calls.
 
-## Dependency Injection ##
+### Dependency Injection ###
 
 In Startup.ConfigureServices, create a service proxy and inject the dependency:
 
