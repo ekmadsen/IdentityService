@@ -335,7 +335,7 @@ namespace ErikTheCoder.Identity.Service.Controllers
             IEnumerable<Role> roles = await Connection.QueryAsync<Role>(query, ApplicationUser);
             foreach (Role role in roles)
             {
-                Logger.Log(CorrelationId, $"{role} role");
+                Logger.Log(CorrelationId, $"{role.Name} role");
                 ApplicationUser.Roles.Add(role.Name);
             }
         }

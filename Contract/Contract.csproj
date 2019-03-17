@@ -20,9 +20,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="ErikTheCoder.ServiceContract" Version="1.0.4" />
+    <PackageReference Include="ErikTheCoder.ServiceContract" Version="1.0.6" />
     <PackageReference Include="JetBrains.Annotations" Version="2018.3.0" />
-    <PackageReference Include="Refit" Version="4.6.30" />
+    <PackageReference Include="Refit" Version="4.6.99" />
   </ItemGroup>
 
 </Project>

@@ -8,13 +8,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="ErikTheCoder.AspNetCore.Middleware" Version="1.0.14" />
-    <PackageReference Include="ErikTheCoder.Logging" Version="1.0.3" />
-    <PackageReference Include="ErikTheCoder.ServiceContract" Version="1.0.4" />
+    <PackageReference Include="ErikTheCoder.AspNetCore.Middleware" Version="1.0.19" />
     <PackageReference Include="JetBrains.Annotations" Version="2018.3.0" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0" PrivateAssets="All" />
-    <PackageReference Include="NuGet.CommandLine" Version="4.9.2">
+    <PackageReference Include="NuGet.CommandLine" Version="4.9.4">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>

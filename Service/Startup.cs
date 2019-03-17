@@ -83,7 +83,7 @@ namespace ErikTheCoder.Identity.Service
         {
             // Require authentication (identification of user).
             ApplicationBuilder.UseAuthentication();
-			// Log parameters, metrics, and performance of each request.
+            // Log parameters, authentication, metrics, and performance of each request.
             ApplicationBuilder.UseErikTheCoderLogging(Options => Options.LogRequestParameters = Program.AppSettings.Logger.TraceLogLevel == LogLevel.Debug);
             // Configure exception handling.
             ApplicationBuilder.UseErikTheCoderExceptionHandling(Options =>
