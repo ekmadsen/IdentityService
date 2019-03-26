@@ -69,11 +69,13 @@ namespace ErikTheCoder.Identity.Service
             // Create logger and password managers.
             ILogger logger = new ConcurrentDatabaseLogger(Program.AppSettings.Logger);
             logger.Log(correlationId, $"{Program.AppSettings.Logger.ProcessName} starting.");
-            IPasswordManagerVersions passwordManagerVersions = new PasswordManagerVersions();
+            ISafeRandom safeRandom = new SafeRandom();
+            IPasswordManagerVersions passwordManagerVersions = new PasswordManagerVersions(safeRandom);
             // Configure dependency injection.
             Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             Services.AddSingleton(typeof(IAppSettings), Program.AppSettings);
             Services.AddSingleton(typeof(ILogger), logger);
+            Services.AddSingleton(typeof(ISafeRandom), safeRandom);
             Services.AddSingleton(typeof(IPasswordManagerVersions), passwordManagerVersions);
         }
 

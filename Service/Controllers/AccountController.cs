@@ -31,7 +31,7 @@ namespace ErikTheCoder.Identity.Service.Controllers
     public class AccountController : ControllerBase, IAccountService
     {
         private const string _invalidCredentials = "Invalid username or password.";
-        private const int _passwordManagerVersion = 2;
+        private const int _passwordManagerVersion = 3;
         private readonly IPasswordManagerVersions _passwordManagerVersions;
 
 
