@@ -1,4 +1,5 @@
 ﻿using System;
+using ErikTheCoder.ServiceContract;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 
 

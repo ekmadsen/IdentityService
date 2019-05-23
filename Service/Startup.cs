@@ -1,9 +1,11 @@
 ﻿using System;
+using System.IO;
 using System.Text;
 using ErikTheCoder.AspNetCore.Middleware;
 using ErikTheCoder.AspNetCore.Middleware.Settings;
 using ErikTheCoder.Identity.Service.PasswordManagers;
 using ErikTheCoder.Logging;
+using ErikTheCoder.ServiceContract;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -14,6 +16,7 @@ using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Primitives;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json.Linq;
 using EnvironmentName = ErikTheCoder.ServiceContract.EnvironmentName;
 
 
@@ -28,12 +31,12 @@ namespace ErikTheCoder.Identity.Service
         [UsedImplicitly]
         public void ConfigureServices(IServiceCollection Services)
         {
-            Guid correlationId = Guid.NewGuid();
+            IAppSettings appSettings = ParseConfigurationFile();
             // Require custom or JWT authentication token.
             // The JWT token specifies the security algorithm used when it was signed (by Identity service).
             Services.AddAuthentication(AuthenticationHandler.AuthenticationScheme).AddErikTheCoderAuthentication(Options =>
             {
-                Options.Identities = Program.AppSettings.AuthenticationIdentities;
+                Options.Identities = appSettings.AuthenticationIdentities;
                 Options.ForwardDefaultSelector = HttpContext =>
                 {
                     // Forward to JWT authentication if custom token is not present.
@@ -49,7 +52,7 @@ namespace ErikTheCoder.Identity.Service
                 Options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Program.AppSettings.CredentialSecret)),
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(appSettings.CredentialSecret)),
                     ValidateIssuer = false,
                     ValidateAudience = false,
                     ValidateLifetime = true,
@@ -57,46 +60,55 @@ namespace ErikTheCoder.Identity.Service
                 };
             });
             // Add MVC, filters, policies, and configure routing.
-            IMvcBuilder mvcBuilder = Services.AddMvc();
-            mvcBuilder.AddMvcOptions(Options => Options.Filters.Add(new AuthorizeFilter(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build()))); // Require authorization (permission to access controller actions).
+            Services.AddMvc(Options => Options.Filters.Add(new AuthorizeFilter(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build()))); // Require authorization (permission to access controller actions).
             Services.AddAuthorization(Options => Options.UseErikTheCoderPolicies()); // Authorize using policies that examine claims.
-            mvcBuilder.AddJsonOptions(Options => Options.SerializerSettings.ContractResolver = new Newtonsoft.Json.Serialization.DefaultContractResolver()); // Preserve case of property names.
             Services.AddRouting(Options => Options.LowercaseUrls = true);
             // Don't use memory cache in services.  Use it in website instead to avoid two network I/O hops:
             //   Website -> Service -> Database
             //   Website <- Service <- Database
             // This guarantees service always provide current data.
-            // Create logger and password managers.
-            ILogger logger = new ConcurrentDatabaseLogger(Program.AppSettings.Logger);
-            logger.Log(correlationId, $"{Program.AppSettings.Logger.ProcessName} starting.");
-            ISafeRandom safeRandom = new SafeRandom();
-            IPasswordManagerVersions passwordManagerVersions = new PasswordManagerVersions(safeRandom);
-            // Configure dependency injection.
+            // Configure dependency injection (DI).  Have DI framework create singleton instances so they're properly disposed.
             Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-            Services.AddSingleton(typeof(IAppSettings), Program.AppSettings);
-            Services.AddSingleton(typeof(ILogger), logger);
-            Services.AddSingleton(typeof(ISafeRandom), safeRandom);
-            Services.AddSingleton(typeof(IPasswordManagerVersions), passwordManagerVersions);
+            Services.AddSingleton(ServiceProvider => ParseConfigurationFile());
+            Services.AddSingleton<ILogger>(ServiceProvider => new ConcurrentDatabaseLogger(ServiceProvider.GetService<IAppSettings>().Logger));
+            Services.AddSingleton<ISafeRandom, SafeRandom>();
+            Services.AddSingleton<IPasswordManagerVersions, PasswordManagerVersions>();
+            Services.AddSingleton<IDatabase, SqlDatabase>();
         }
 
 
         [UsedImplicitly]
-        public void Configure(IApplicationBuilder ApplicationBuilder, IHostingEnvironment HostingEnvironment)
+        public void Configure(IApplicationBuilder ApplicationBuilder, IHostingEnvironment HostingEnvironment, IAppSettings AppSettings, ILogger Logger)
         {
+            Guid correlationId = Guid.NewGuid();
+            Logger.Log(correlationId, $"{AppSettings.Logger.ProcessName} starting.");
             // Require authentication (identification of user).
             ApplicationBuilder.UseAuthentication();
             // Log parameters, authentication, metrics, and performance of each request.
-            ApplicationBuilder.UseErikTheCoderLogging(Options => Options.LogRequestParameters = Program.AppSettings.Logger.TraceLogLevel == LogLevel.Debug);
+            // ReSharper disable once ImplicitlyCapturedClosure
+            ApplicationBuilder.UseErikTheCoderLogging(Options => Options.LogRequestParameters = AppSettings.Logger.TraceLogLevel == LogLevel.Debug);
             // Configure exception handling.
             ApplicationBuilder.UseErikTheCoderExceptionHandling(Options =>
             {
-                Options.AppName = Program.AppSettings.Logger.AppName;
-                Options.ProcessName = Program.AppSettings.Logger.ProcessName;
+                Options.AppName = AppSettings.Logger.AppName;
+                Options.ProcessName = AppSettings.Logger.ProcessName;
                 Options.ExceptionResponseFormat = ExceptionResponseFormat.Json;
                 Options.IncludeDetails = !HostingEnvironment.IsEnvironment(EnvironmentName.Prod);
             });
             // Use MVC.
             ApplicationBuilder.UseMvc();
+        }
+
+
+        private static IAppSettings ParseConfigurationFile()
+        {
+            const string environmentalVariableName = "ASPNETCORE_ENVIRONMENT";
+            string environment = Environment.GetEnvironmentVariable(environmentalVariableName) ?? Microsoft.AspNetCore.Hosting.EnvironmentName.Development;
+            string directory = Path.GetDirectoryName(typeof(Program).Assembly.Location) ?? string.Empty;
+            string configurationFile = Path.Combine(directory, "appSettings.json");
+            if (!File.Exists(configurationFile)) throw new Exception($"Configuration file not found at {configurationFile}.");
+            JObject configuration = JObject.Parse(File.ReadAllText(configurationFile));
+            return configuration.GetValue(environment).ToObject<AppSettings>();
         }
     }
 }

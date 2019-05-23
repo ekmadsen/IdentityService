@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlClient;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Net.Mail;
@@ -32,12 +31,14 @@ namespace ErikTheCoder.Identity.Service.Controllers
     {
         private const string _invalidCredentials = "Invalid username or password.";
         private const int _passwordManagerVersion = 3;
+        private readonly IDatabase _database;
         private readonly IPasswordManagerVersions _passwordManagerVersions;
 
 
-        public AccountController(IAppSettings AppSettings, ILogger Logger, IPasswordManagerVersions PasswordManagerVersions) :
+        public AccountController(IAppSettings AppSettings, ILogger Logger, IDatabase Database, IPasswordManagerVersions PasswordManagerVersions) :
             base(AppSettings, Logger)
         {
+            _database = Database;
             _passwordManagerVersions = PasswordManagerVersions;
         }
 
@@ -55,9 +56,8 @@ namespace ErikTheCoder.Identity.Service.Controllers
                 and u.Confirmed = 1
                 and u.Enabled = 1";
             User user;
-            using (SqlConnection connection = new SqlConnection(AppSettings.Database))
+            using (IDbConnection connection = await _database.OpenConnection())
             {
-                await connection.OpenAsync();
                 user = await connection.QuerySingleOrDefaultAsync<User>(query, Request);
                 if (user != null)
                 {
@@ -120,9 +120,8 @@ namespace ErikTheCoder.Identity.Service.Controllers
                 output inserted.id
                 values (@username, 1, 0, @passwordManagerVersion, @salt, @passwordHash, @emailAddress, @firstName, @lastName)";
             int userId;
-            using (SqlConnection connection = new SqlConnection(AppSettings.Database))
+            using (IDbConnection connection = await _database.OpenConnection())
             {
-                await connection.OpenAsync();
                 userId = (int)await connection.ExecuteScalarAsync(addUserQuery, addUserQueryParameters);
             }
             // Add confirmation to database.
@@ -137,9 +136,8 @@ namespace ErikTheCoder.Identity.Service.Controllers
             const string confirmationQuery = @"
                 insert into [Identity].UserConfirmations (UserId, EmailAddress, Code, Sent)
                 values (@userId, @emailAddress, @code, @sent)";
-            using (SqlConnection connection = new SqlConnection(AppSettings.Database))
+            using (IDbConnection connection = await _database.OpenConnection())
             {
-                await connection.OpenAsync();
                 await connection.ExecuteAsync(confirmationQuery, confirmationQueryParameters);
             }
             // Send confirmation email.
@@ -191,9 +189,8 @@ namespace ErikTheCoder.Identity.Service.Controllers
                 where EmailAddress = @emailAddress
                 and Code = @code
                 select @userId";
-            using (SqlConnection connection = new SqlConnection(AppSettings.Database))
+            using (IDbConnection connection = await _database.OpenConnection())
             {
-                await connection.OpenAsync();
                 int userId = (int)await connection.ExecuteScalarAsync(confirmationQuery, confirmationQueryParameters);
                 if (userId > 0)
                 {
@@ -230,9 +227,8 @@ namespace ErikTheCoder.Identity.Service.Controllers
                 where u.EmailAddress = @emailAddress
                 insert into [Identity].UserConfirmations (UserId, EmailAddress, Code, Sent)
                 values (@userId, @emailAddress, @code, @sent)";
-            using (SqlConnection connection = new SqlConnection(AppSettings.Database))
+            using (IDbConnection connection = await _database.OpenConnection())
             {
-                await connection.OpenAsync();
                 await connection.ExecuteAsync(confirmationQuery, confirmationQueryParameters);
             }
             // Send confirmation email.
@@ -291,9 +287,8 @@ namespace ErikTheCoder.Identity.Service.Controllers
                 where EmailAddress = @emailAddress
                 and Code = @code
                 select @userId";
-            using (SqlConnection connection = new SqlConnection(AppSettings.Database))
+            using (IDbConnection connection = await _database.OpenConnection())
             {
-                await connection.OpenAsync();
                 int userId = (int)await connection.ExecuteScalarAsync(confirmationQuery, confirmationQueryParameters);
                 if (userId > 0)
                 {

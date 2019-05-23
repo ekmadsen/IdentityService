@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using ErikTheCoder.ServiceContract;
 
 
 namespace ErikTheCoder.Identity.Service.PasswordManagers

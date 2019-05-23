@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using ErikTheCoder.ServiceContract;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Security.Cryptography;
+using ErikTheCoder.ServiceContract;
 
 
 namespace ErikTheCoder.Identity.Service.PasswordManagers
