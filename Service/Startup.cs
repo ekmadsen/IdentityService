@@ -73,7 +73,7 @@ namespace ErikTheCoder.Identity.Service
             Services.AddSingleton<ILogger>(ServiceProvider => new ConcurrentDatabaseLogger(ServiceProvider.GetService<IAppSettings>().Logger));
             Services.AddSingleton<ISafeRandom, SafeRandom>();
             Services.AddSingleton<IPasswordManagerVersions, PasswordManagerVersions>();
-            Services.AddSingleton<IDatabase, SqlDatabase>();
+            Services.AddSingleton<IDatabase>(ServiceProvider => new SqlDatabase(ServiceProvider.GetService<IAppSettings>().Database));
         }
 
 
