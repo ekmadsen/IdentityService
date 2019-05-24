@@ -69,6 +69,8 @@ namespace ErikTheCoder.Identity.Service.Controllers
                         // Add roles, claims, and security token.
                         List<Task> tasks = new List<Task>
                         {
+                            // TODO: Determine if equivalent performance can be achieved by executing two queries in one round-trip to SQL Server via Dapper's QueryMultiple method.
+                            // Running two queries concurrently requires "MultipleActiveResultSets=True" included in the SQL Server connection string.
                             AddRoles(connection, user),
                             AddClaims(connection, user)
                         };
