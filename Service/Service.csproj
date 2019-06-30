@@ -5,14 +5,14 @@
     <RootNamespace>ErikTheCoder.Identity.Service</RootNamespace>
     <AssemblyName>ErikTheCoder.Identity.Service</AssemblyName>
     <Authors>Erik Madsen</Authors>
-    <Description>Startup and controller bases classes to host Identity service.</Description>
+    <Description>Startup and controller base classes to host Identity service.</Description>
     <Copyright>2019</Copyright>
     <PackageProjectUrl>https://github.com/ekmadsen/IdentityService</PackageProjectUrl>
     <RepositoryUrl>https://github.com/ekmadsen/IdentityService</RepositoryUrl>
     <RepositoryType>GitHub</RepositoryType>
     <PackageTags>identity user-management credential-storage role-management</PackageTags>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.0</Version>
+    <Version>1.0.1</Version>
     <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
   </PropertyGroup>
 
