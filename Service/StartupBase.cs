@@ -5,7 +5,7 @@ using ErikTheCoder.AspNetCore.Middleware;
 using ErikTheCoder.AspNetCore.Middleware.Settings;
 using ErikTheCoder.Identity.Service.PasswordManagers;
 using ErikTheCoder.Logging;
-using ErikTheCoder.ServiceContract;
+using ErikTheCoder.Utilities;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -17,19 +17,19 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Primitives;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json.Linq;
-using EnvironmentName = ErikTheCoder.ServiceContract.EnvironmentName;
+using EnvironmentName = ErikTheCoder.Utilities.EnvironmentName;
 
 
 namespace ErikTheCoder.Identity.Service
 {
-    public class Startup
+    public abstract class StartupBase
     {
         // Define configuration values that do not vary per environment, and therefore are not saved in appsettings.json.
         private const int _clockSkewMinutes = 5;
 
 
         [UsedImplicitly]
-        public void ConfigureServices(IServiceCollection Services)
+        protected virtual void ConfigureServices(IServiceCollection Services)
         {
             IAppSettings appSettings = ParseConfigurationFile();
             // Require custom or JWT authentication token.
@@ -71,14 +71,14 @@ namespace ErikTheCoder.Identity.Service
             Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             Services.AddSingleton(ServiceProvider => ParseConfigurationFile());
             Services.AddSingleton<ILogger>(ServiceProvider => new ConcurrentDatabaseLogger(ServiceProvider.GetService<IAppSettings>().Logger));
-            Services.AddSingleton<ISafeRandom, SafeRandom>();
+            Services.AddSingleton<IThreadsafeRandom, ThreadsafeCryptoRandom>();
             Services.AddSingleton<IPasswordManagerVersions, PasswordManagerVersions>();
             Services.AddSingleton<IDatabase>(ServiceProvider => new SqlDatabase(ServiceProvider.GetService<IAppSettings>().Database));
         }
 
 
         [UsedImplicitly]
-        public void Configure(IApplicationBuilder ApplicationBuilder, IHostingEnvironment HostingEnvironment, IAppSettings AppSettings, ILogger Logger)
+        protected virtual void Configure(IApplicationBuilder ApplicationBuilder, IHostingEnvironment HostingEnvironment, IAppSettings AppSettings, ILogger Logger)
         {
             Guid correlationId = Guid.NewGuid();
             Logger.Log(correlationId, $"{AppSettings.Logger.ProcessName} starting.");
@@ -100,11 +100,11 @@ namespace ErikTheCoder.Identity.Service
         }
 
 
-        private static IAppSettings ParseConfigurationFile()
+        protected virtual IAppSettings ParseConfigurationFile()
         {
             const string environmentalVariableName = "ASPNETCORE_ENVIRONMENT";
             string environment = Environment.GetEnvironmentVariable(environmentalVariableName) ?? Microsoft.AspNetCore.Hosting.EnvironmentName.Development;
-            string directory = Path.GetDirectoryName(typeof(Program).Assembly.Location) ?? string.Empty;
+            string directory = Path.GetDirectoryName(typeof(StartupBase).Assembly.Location) ?? string.Empty;
             string configurationFile = Path.Combine(directory, "appSettings.json");
             if (!File.Exists(configurationFile)) throw new Exception($"Configuration file not found at {configurationFile}.");
             JObject configuration = JObject.Parse(File.ReadAllText(configurationFile));

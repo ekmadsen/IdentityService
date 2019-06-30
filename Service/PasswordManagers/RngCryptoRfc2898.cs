@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Security.Cryptography;
-using ErikTheCoder.ServiceContract;
+using ErikTheCoder.Utilities;
 
 
 namespace ErikTheCoder.Identity.Service.PasswordManagers
 {
     public class RngCryptoRfc2898 : PasswordManagerBase
     {
-        public RngCryptoRfc2898(ISafeRandom SafeRandom, int SaltLength, int HashLength, int Iterations, int MinCharacters, int MinLowerAlpha, int MinUpperAlpha, int MinDigits, int MinSpecial) :
-            base(SafeRandom, SaltLength, HashLength, Iterations, MinCharacters, MinLowerAlpha, MinUpperAlpha, MinDigits, MinSpecial)
+        public RngCryptoRfc2898(IThreadsafeRandom Random, int SaltLength, int HashLength, int Iterations, int MinCharacters, int MinLowerAlpha, int MinUpperAlpha, int MinDigits, int MinSpecial) :
+            base(Random, SaltLength, HashLength, Iterations, MinCharacters, MinLowerAlpha, MinUpperAlpha, MinDigits, MinSpecial)
         {
         }
 
@@ -19,7 +19,7 @@ namespace ErikTheCoder.Identity.Service.PasswordManagers
             // Storing a salt value with a hashed password prevents identical passwords from hashing to the same stored value.
             // See https://security.stackexchange.com/questions/17421/how-to-store-salt
             byte[] saltBytes = new byte[SaltLength];
-            SafeRandom.NextBytes(saltBytes);
+            Random.NextBytes(saltBytes);
             string salt = Convert.ToBase64String(saltBytes);
             // Get derived bytes from the combined salt and password, using the specified number of iterations.
             using (Rfc2898DeriveBytes derivedBytes = new Rfc2898DeriveBytes(Password, saltBytes, Iterations))

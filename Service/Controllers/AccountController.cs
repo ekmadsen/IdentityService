@@ -27,7 +27,7 @@ namespace ErikTheCoder.Identity.Service.Controllers
 {
     [Authorize(Policy = Policy.Admin)]
     [Route("account")]
-    public class AccountController : ControllerBase, IAccountService
+    public abstract class AccountController : ControllerBase, IAccountService
     {
         private const string _invalidCredentials = "Invalid username or password.";
         private const int _passwordManagerVersion = 3;
@@ -35,7 +35,7 @@ namespace ErikTheCoder.Identity.Service.Controllers
         private readonly IPasswordManagerVersions _passwordManagerVersions;
 
 
-        public AccountController(IAppSettings AppSettings, ILogger Logger, IDatabase Database, IPasswordManagerVersions PasswordManagerVersions) :
+        protected AccountController(IAppSettings AppSettings, ILogger Logger, IDatabase Database, IPasswordManagerVersions PasswordManagerVersions) :
             base(AppSettings, Logger)
         {
             _database = Database;
@@ -46,7 +46,7 @@ namespace ErikTheCoder.Identity.Service.Controllers
         // Access ASP.NETCore's Request property via this.Request.
         // ReSharper disable ParameterHidesMember
         [HttpPost("login")]
-        public async Task<User> LoginAsync([FromBody] LoginRequest Request)
+        public virtual async Task<User> LoginAsync([FromBody] LoginRequest Request)
         {
             // Validate password against hash stored in database.
             const string query = @"
@@ -71,8 +71,8 @@ namespace ErikTheCoder.Identity.Service.Controllers
                         {
                             // TODO: Determine if equivalent performance can be achieved by executing two queries in one round-trip to SQL Server via Dapper's QueryMultiple method.
                             // Running two queries concurrently requires "MultipleActiveResultSets=True" included in the SQL Server connection string.
-                            AddRoles(connection, user),
-                            AddClaims(connection, user)
+                            AddRolesAsync(connection, user),
+                            AddClaimsAsync(connection, user)
                         };
                         await Task.WhenAll(tasks);
                         AddSecurityToken(user);
@@ -90,7 +90,7 @@ namespace ErikTheCoder.Identity.Service.Controllers
 
 
         [HttpPost("register")]
-        public async Task<RegisterResponse> RegisterAsync([FromBody] RegisterRequest Request)
+        public virtual async Task<RegisterResponse> RegisterAsync([FromBody] RegisterRequest Request)
         {
             // TODO: Validate email address and username are available.
             // TODO: Run multiple SQL insert statements in a transaction.  Rollback if an exception occurs.
@@ -173,7 +173,7 @@ namespace ErikTheCoder.Identity.Service.Controllers
 
 
         [HttpPost("confirm")]
-        public async Task ConfirmAsync([FromBody] ConfirmRequest Request)
+        public virtual async Task ConfirmAsync([FromBody] ConfirmRequest Request)
         {
             // TODO: Run multiple SQL update statements in a transaction.  Rollback if an exception occurs.
             // Update confirmation in database.
@@ -210,7 +210,7 @@ namespace ErikTheCoder.Identity.Service.Controllers
 
 
         [HttpPost("forgotpassword")]
-        public async Task ForgotPasswordAsync([FromBody] ForgotPasswordRequest Request)
+        public virtual async Task ForgotPasswordAsync([FromBody] ForgotPasswordRequest Request)
         {
             // TODO: Validate email address but don't disclose to user whether an account exists for the email address.
             // TODO: Include username in email message.
@@ -259,7 +259,7 @@ namespace ErikTheCoder.Identity.Service.Controllers
 
 
         [HttpPost("resetpassword")]
-        public async Task<ResetPasswordResponse> ResetPasswordAsync([FromBody] ResetPasswordRequest Request)
+        public virtual async Task<ResetPasswordResponse> ResetPasswordAsync([FromBody] ResetPasswordRequest Request)
         {
             // TODO: Run multiple SQL update statements in a transaction.  Rollback if an exception occurs.
             // Validate password meets complexity requirements.
@@ -319,7 +319,7 @@ namespace ErikTheCoder.Identity.Service.Controllers
         }
 
 
-        private async Task AddRoles(IDbConnection Connection, User ApplicationUser)
+        protected virtual async Task AddRolesAsync(IDbConnection Connection, User ApplicationUser)
         {
             Logger.Log(CorrelationId, $"Adding roles to {ApplicationUser.Username} User object.");
             const string query = @"
@@ -338,7 +338,7 @@ namespace ErikTheCoder.Identity.Service.Controllers
         }
 
 
-        private async Task AddClaims(IDbConnection Connection, User ApplicationUser)
+        protected virtual async Task AddClaimsAsync(IDbConnection Connection, User ApplicationUser)
         {
             Logger.Log(CorrelationId, $"Adding claims to {ApplicationUser.Username} User object.");
             const string query = @"
@@ -358,7 +358,7 @@ namespace ErikTheCoder.Identity.Service.Controllers
         }
 
 
-        private void AddSecurityToken(User ApplicationUser)
+        protected virtual void AddSecurityToken(User ApplicationUser)
         {
             List<Claim> claims = ApplicationUser.GetClaims();
             // Add valid time range claims.

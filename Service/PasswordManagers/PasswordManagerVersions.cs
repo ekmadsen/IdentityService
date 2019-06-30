@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using ErikTheCoder.ServiceContract;
+using ErikTheCoder.Utilities;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 
 
@@ -7,13 +7,13 @@ namespace ErikTheCoder.Identity.Service.PasswordManagers
 {
     public class PasswordManagerVersions : Dictionary<int, IPasswordManager>, IPasswordManagerVersions
     {
-        public PasswordManagerVersions(ISafeRandom SafeRandom)
+        public PasswordManagerVersions(IThreadsafeRandom Random)
         {
             // Add all versions.
             // ReSharper disable ArgumentsStyleLiteral
             // ReSharper disable ArgumentsStyleNamedExpression
             Add(1, new RngCryptoRfc2898(
-                SafeRandom: SafeRandom,
+                Random: Random,
                 SaltLength: 16,
                 HashLength: 32,
                 Iterations: 1_000,
@@ -24,7 +24,7 @@ namespace ErikTheCoder.Identity.Service.PasswordManagers
                 MinSpecial: 0
             ));
             Add(2, new RngCryptoRfc2898(
-                SafeRandom: SafeRandom,
+                Random: Random,
                 SaltLength: 16,
                 HashLength: 32,
                 Iterations: 10_000,
@@ -35,7 +35,7 @@ namespace ErikTheCoder.Identity.Service.PasswordManagers
                 MinSpecial: 1
             ));
             Add(3, new Pbkdf2(
-                SafeRandom: SafeRandom,
+                Random: Random,
                 KeyDerivationPrf: KeyDerivationPrf.HMACSHA512,
                 SaltLength: 16,
                 HashLength: 32,

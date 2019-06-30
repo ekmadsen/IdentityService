@@ -1,5 +1,5 @@
 ﻿using System;
-using ErikTheCoder.ServiceContract;
+using ErikTheCoder.Utilities;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 
 
@@ -10,8 +10,8 @@ namespace ErikTheCoder.Identity.Service.PasswordManagers
         private readonly KeyDerivationPrf _keyDerivationPrf;
 
 
-        public Pbkdf2(ISafeRandom SafeRandom, KeyDerivationPrf KeyDerivationPrf, int SaltLength, int HashLength, int Iterations, int MinCharacters, int MinLowerAlpha, int MinUpperAlpha, int MinDigits, int MinSpecial) :
-            base(SafeRandom, SaltLength, HashLength, Iterations, MinCharacters, MinLowerAlpha, MinUpperAlpha, MinDigits, MinSpecial)
+        public Pbkdf2(IThreadsafeRandom Random, KeyDerivationPrf KeyDerivationPrf, int SaltLength, int HashLength, int Iterations, int MinCharacters, int MinLowerAlpha, int MinUpperAlpha, int MinDigits, int MinSpecial) :
+            base(Random, SaltLength, HashLength, Iterations, MinCharacters, MinLowerAlpha, MinUpperAlpha, MinDigits, MinSpecial)
         {
             _keyDerivationPrf = KeyDerivationPrf;
         }
@@ -23,7 +23,7 @@ namespace ErikTheCoder.Identity.Service.PasswordManagers
             // Storing a salt value with a hashed password prevents identical passwords from hashing to the same stored value.
             // See https://security.stackexchange.com/questions/17421/how-to-store-salt
             byte[] saltBytes = new byte[SaltLength];
-            SafeRandom.NextBytes(saltBytes);
+            Random.NextBytes(saltBytes);
             string salt = Convert.ToBase64String(saltBytes);
             // Get derived bytes from the combined salt and password, using the specified number of iterations.
             byte[] hashBytes = KeyDerivation.Pbkdf2(Password, saltBytes, _keyDerivationPrf, Iterations, HashLength);

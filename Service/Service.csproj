@@ -1,23 +1,40 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
-    <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <RootNamespace>ErikTheCoder.Identity.Service</RootNamespace>
     <AssemblyName>ErikTheCoder.Identity.Service</AssemblyName>
+    <Authors>Erik Madsen</Authors>
+    <Description>Startup and controller bases classes to host Identity service.</Description>
+    <Copyright>2019</Copyright>
+    <PackageProjectUrl>https://github.com/ekmadsen/IdentityService</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/ekmadsen/IdentityService</RepositoryUrl>
+    <RepositoryType>GitHub</RepositoryType>
+    <PackageTags>identity user-management credential-storage role-management</PackageTags>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Version>1.0.0</Version>
+    <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn>1701;1702;NU5105</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="ErikTheCoder.AspNetCore.Middleware" Version="1.0.24" />
-    <PackageReference Include="ErikTheCoder.ServiceContract" Version="1.0.11" />
+    <None Remove="appSettings.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="appSettings.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ErikTheCoder.AspNetCore.Middleware" Version="1.0.25" />
+    <PackageReference Include="ErikTheCoder.ServiceContract" Version="1.0.12" />
     <PackageReference Include="JetBrains.Annotations" Version="2019.1.1" />
-    <PackageReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Cryptography.KeyDerivation" Version="2.2.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0" PrivateAssets="All" />
-    <PackageReference Include="NuGet.CommandLine" Version="5.0.2">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="5.5.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -28,6 +45,13 @@
     <Content Update="appSettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\LICENSE.md">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>

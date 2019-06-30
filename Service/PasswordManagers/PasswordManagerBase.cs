@@ -1,12 +1,13 @@
-﻿using System.Collections.Generic;
-using ErikTheCoder.ServiceContract;
+﻿using System;
+using System.Collections.Generic;
+using ErikTheCoder.Utilities;
 
 
 namespace ErikTheCoder.Identity.Service.PasswordManagers
 {
     public abstract class PasswordManagerBase : IPasswordManager
     {
-        protected readonly ISafeRandom SafeRandom;
+        protected IThreadsafeRandom Random;
         protected readonly int SaltLength;
         protected readonly int HashLength;
         protected readonly int Iterations;
@@ -15,11 +16,12 @@ namespace ErikTheCoder.Identity.Service.PasswordManagers
         private readonly int _minUpperAlpha;
         private readonly int _minDigits;
         private readonly int _minSpecial;
+        private bool _disposed;
 
 
-        protected PasswordManagerBase(ISafeRandom SafeRandom, int SaltLength, int HashLength, int Iterations, int MinCharacters, int MinLowerAlpha, int MinUpperAlpha, int MinDigits, int MinSpecial)
+        protected PasswordManagerBase(IThreadsafeRandom Random, int SaltLength, int HashLength, int Iterations, int MinCharacters, int MinLowerAlpha, int MinUpperAlpha, int MinDigits, int MinSpecial)
         {
-            this.SafeRandom = SafeRandom;
+            this.Random = Random;
             this.SaltLength = SaltLength;
             this.HashLength = HashLength;
             this.Iterations = Iterations;
@@ -28,6 +30,32 @@ namespace ErikTheCoder.Identity.Service.PasswordManagers
             _minUpperAlpha = MinUpperAlpha;
             _minDigits = MinDigits;
             _minSpecial = MinSpecial;
+        }
+
+
+        // See Microsoft-recommended dispose pattern at https://docs.microsoft.com/en-us/dotnet/standard/garbage-collection/implementing-dispose.
+        ~PasswordManagerBase() => Dispose(false);
+
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+
+        // ReSharper disable once VirtualMemberNeverOverridden.Global
+        protected virtual void Dispose(bool Disposing)
+        {
+            if (_disposed) return;
+            if (Disposing)
+            {
+                // No managed objects to free.
+            }
+            // Free unmanaged objects.
+            Random?.Dispose();
+            Random = null;
+            _disposed = true;
         }
 
 
