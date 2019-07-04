@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Text;
 using ErikTheCoder.AspNetCore.Middleware;
 using ErikTheCoder.AspNetCore.Middleware.Settings;
@@ -16,13 +15,12 @@ using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Primitives;
 using Microsoft.IdentityModel.Tokens;
-using Newtonsoft.Json.Linq;
 using EnvironmentName = ErikTheCoder.Utilities.EnvironmentName;
 
 
 namespace ErikTheCoder.Identity.Service
 {
-    public abstract class StartupBase
+    public abstract class StartupBase : ErikTheCoder.AspNetCore.Middleware.StartupBase
     {
         // Define configuration values that do not vary per environment, and therefore are not saved in appsettings.json.
         private const int _clockSkewMinutes = 5;
@@ -31,7 +29,7 @@ namespace ErikTheCoder.Identity.Service
         [UsedImplicitly]
         protected virtual void ConfigureServices(IServiceCollection Services)
         {
-            IAppSettings appSettings = ParseConfigurationFile();
+            IAppSettings appSettings = ParseConfigurationFile<IAppSettings, AppSettings>();
             // Require custom or JWT authentication token.
             // The JWT token specifies the security algorithm used when it was signed (by Identity service).
             Services.AddAuthentication(AuthenticationHandler.AuthenticationScheme).AddErikTheCoderAuthentication(Options =>
@@ -69,7 +67,7 @@ namespace ErikTheCoder.Identity.Service
             // This guarantees service always provide current data.
             // Configure dependency injection (DI).  Have DI framework create singleton instances so they're properly disposed.
             Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-            Services.AddSingleton(ServiceProvider => ParseConfigurationFile());
+            Services.AddSingleton(ServiceProvider => ParseConfigurationFile<IAppSettings, AppSettings>());
             Services.AddSingleton<ILogger>(ServiceProvider => new ConcurrentDatabaseLogger(ServiceProvider.GetService<IAppSettings>().Logger));
             Services.AddSingleton<IThreadsafeRandom, ThreadsafeCryptoRandom>();
             Services.AddSingleton<IPasswordManagerVersions, PasswordManagerVersions>();
@@ -97,18 +95,6 @@ namespace ErikTheCoder.Identity.Service
             });
             // Use MVC.
             ApplicationBuilder.UseMvc();
-        }
-
-
-        protected virtual IAppSettings ParseConfigurationFile()
-        {
-            const string environmentalVariableName = "ASPNETCORE_ENVIRONMENT";
-            string environment = Environment.GetEnvironmentVariable(environmentalVariableName) ?? Microsoft.AspNetCore.Hosting.EnvironmentName.Development;
-            string directory = Path.GetDirectoryName(typeof(StartupBase).Assembly.Location) ?? string.Empty;
-            string configurationFile = Path.Combine(directory, "appSettings.json");
-            if (!File.Exists(configurationFile)) throw new Exception($"Configuration file not found at {configurationFile}.");
-            JObject configuration = JObject.Parse(File.ReadAllText(configurationFile));
-            return configuration.GetValue(environment).ToObject<AppSettings>();
         }
     }
 }
