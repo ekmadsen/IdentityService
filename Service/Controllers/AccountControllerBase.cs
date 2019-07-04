@@ -27,7 +27,7 @@ namespace ErikTheCoder.Identity.Service.Controllers
 {
     [Authorize(Policy = Policy.Admin)]
     [Route("account")]
-    public abstract class AccountController : ControllerBase, IAccountService
+    public abstract class AccountControllerBase : ControllerBase, IAccountService
     {
         private const string _invalidCredentials = "Invalid username or password.";
         private const int _passwordManagerVersion = 3;
@@ -35,7 +35,7 @@ namespace ErikTheCoder.Identity.Service.Controllers
         private readonly IPasswordManagerVersions _passwordManagerVersions;
 
 
-        protected AccountController(IAppSettings AppSettings, ILogger Logger, IDatabase Database, IPasswordManagerVersions PasswordManagerVersions) :
+        protected AccountControllerBase(IAppSettings AppSettings, ILogger Logger, IDatabase Database, IPasswordManagerVersions PasswordManagerVersions) :
             base(AppSettings, Logger)
         {
             _database = Database;
