@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Dapper;
 using ErikTheCoder.AspNetCore.Middleware;
 using ErikTheCoder.AspNetCore.Middleware.Settings;
+using ErikTheCoder.Data;
 using ErikTheCoder.Identity.Contract;
 using ErikTheCoder.Identity.Contract.Requests;
 using ErikTheCoder.Identity.Contract.Responses;
@@ -31,11 +32,11 @@ namespace ErikTheCoder.Identity.Service.Controllers
     {
         private const string _invalidCredentials = "Invalid username or password.";
         private const int _passwordManagerVersion = 3;
-        private readonly IDatabase _database;
+        private readonly ILoggedDatabase _database;
         private readonly IPasswordManagerVersions _passwordManagerVersions;
 
 
-        protected AccountControllerBase(IAppSettings AppSettings, ILogger Logger, IDatabase Database, IPasswordManagerVersions PasswordManagerVersions) :
+        protected AccountControllerBase(IAppSettings AppSettings, ILogger Logger, ILoggedDatabase Database, IPasswordManagerVersions PasswordManagerVersions) :
             base(AppSettings, Logger)
         {
             _database = Database;
@@ -56,7 +57,7 @@ namespace ErikTheCoder.Identity.Service.Controllers
                 and u.Confirmed = 1
                 and u.Enabled = 1";
             User user;
-            using (IDbConnection connection = await _database.OpenConnectionAsync())
+            using (IDbConnection connection = await _database.OpenConnectionAsync(CorrelationId))
             {
                 user = await connection.QuerySingleOrDefaultAsync<User>(query, Request);
                 if (user != null)
@@ -122,7 +123,7 @@ namespace ErikTheCoder.Identity.Service.Controllers
                 output inserted.id
                 values (@username, 1, 0, @passwordManagerVersion, @salt, @passwordHash, @emailAddress, @firstName, @lastName)";
             int userId;
-            using (IDbConnection connection = await _database.OpenConnectionAsync())
+            using (IDbConnection connection = await _database.OpenConnectionAsync(CorrelationId))
             {
                 userId = (int)await connection.ExecuteScalarAsync(addUserQuery, addUserQueryParameters);
             }
@@ -138,7 +139,7 @@ namespace ErikTheCoder.Identity.Service.Controllers
             const string confirmationQuery = @"
                 insert into [Identity].UserConfirmations (UserId, EmailAddress, Code, Sent)
                 values (@userId, @emailAddress, @code, @sent)";
-            using (IDbConnection connection = await _database.OpenConnectionAsync())
+            using (IDbConnection connection = await _database.OpenConnectionAsync(CorrelationId))
             {
                 await connection.ExecuteAsync(confirmationQuery, confirmationQueryParameters);
             }
@@ -191,7 +192,7 @@ namespace ErikTheCoder.Identity.Service.Controllers
                 where EmailAddress = @emailAddress
                 and Code = @code
                 select @userId";
-            using (IDbConnection connection = await _database.OpenConnectionAsync())
+            using (IDbConnection connection = await _database.OpenConnectionAsync(CorrelationId))
             {
                 int userId = (int)await connection.ExecuteScalarAsync(confirmationQuery, confirmationQueryParameters);
                 if (userId > 0)
@@ -229,7 +230,7 @@ namespace ErikTheCoder.Identity.Service.Controllers
                 where u.EmailAddress = @emailAddress
                 insert into [Identity].UserConfirmations (UserId, EmailAddress, Code, Sent)
                 values (@userId, @emailAddress, @code, @sent)";
-            using (IDbConnection connection = await _database.OpenConnectionAsync())
+            using (IDbConnection connection = await _database.OpenConnectionAsync(CorrelationId))
             {
                 await connection.ExecuteAsync(confirmationQuery, confirmationQueryParameters);
             }
@@ -289,7 +290,7 @@ namespace ErikTheCoder.Identity.Service.Controllers
                 where EmailAddress = @emailAddress
                 and Code = @code
                 select @userId";
-            using (IDbConnection connection = await _database.OpenConnectionAsync())
+            using (IDbConnection connection = await _database.OpenConnectionAsync(CorrelationId))
             {
                 int userId = (int)await connection.ExecuteScalarAsync(confirmationQuery, confirmationQueryParameters);
                 if (userId > 0)

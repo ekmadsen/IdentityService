@@ -2,6 +2,7 @@
 using System.Text;
 using ErikTheCoder.AspNetCore.Middleware;
 using ErikTheCoder.AspNetCore.Middleware.Settings;
+using ErikTheCoder.Data;
 using ErikTheCoder.Identity.Service.PasswordManagers;
 using ErikTheCoder.Logging;
 using ErikTheCoder.Utilities;
@@ -27,7 +28,7 @@ namespace ErikTheCoder.Identity.Service
 
 
         [UsedImplicitly]
-        protected virtual void ConfigureServices(IServiceCollection Services)
+        public virtual void ConfigureServices(IServiceCollection Services)
         {
             IAppSettings appSettings = ParseConfigurationFile<IAppSettings, AppSettings>();
             // Require custom or JWT authentication token.
@@ -68,15 +69,15 @@ namespace ErikTheCoder.Identity.Service
             // Configure dependency injection (DI).  Have DI framework create singleton instances so they're properly disposed.
             Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             Services.AddSingleton(ServiceProvider => ParseConfigurationFile<IAppSettings, AppSettings>());
-            Services.AddSingleton<ILogger>(ServiceProvider => new ConcurrentDatabaseLogger(ServiceProvider.GetService<IAppSettings>().Logger));
+            Services.AddSingleton<ILogger>(ServiceProvider => new ConcurrentDatabaseLogger(ServiceProvider.GetService<IAppSettings>().Logger, new SqlDatabase()));
             Services.AddSingleton<IThreadsafeRandom, ThreadsafeCryptoRandom>();
             Services.AddSingleton<IPasswordManagerVersions, PasswordManagerVersions>();
-            Services.AddSingleton<IDatabase>(ServiceProvider => new SqlDatabase(ServiceProvider.GetService<IAppSettings>().Database));
+            Services.AddSingleton<ILoggedDatabase>(ServiceProvider => new LoggedSqlDatabase(ServiceProvider.GetService<ILogger>(), ServiceProvider.GetService<IAppSettings>().Database));
         }
 
 
         [UsedImplicitly]
-        protected virtual void Configure(IApplicationBuilder ApplicationBuilder, IHostingEnvironment HostingEnvironment, IAppSettings AppSettings, ILogger Logger)
+        public virtual void Configure(IApplicationBuilder ApplicationBuilder, IHostingEnvironment HostingEnvironment, IAppSettings AppSettings, ILogger Logger)
         {
             Guid correlationId = Guid.NewGuid();
             Logger.Log(correlationId, $"{AppSettings.Logger.ProcessName} starting.");
