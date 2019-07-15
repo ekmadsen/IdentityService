@@ -13,28 +13,28 @@ namespace ErikTheCoder.Identity.Contract
     {
         // Refit requires a string literal URL, not a constant.  Ensure the implementing service uses the same URL.
         // See https://stackoverflow.com/questions/47537005/how-to-share-service-method-url-between-refit-and-web-api
-        [Post("/account/login")]
         [UsedImplicitly]
+        [Post("/account/login")]
         Task<User> LoginAsync([Body] LoginRequest Request);
 
 
-        [Post("/account/register")]
         [UsedImplicitly]
+        [Post("/account/register")]
         Task<RegisterResponse> RegisterAsync([Body] RegisterRequest Request);
 
 
-        [Post("/account/confirm")]
         [UsedImplicitly]
+        [Post("/account/confirm")]
         Task ConfirmAsync([Body] ConfirmRequest Request);
 
 
-        [Post("/account/forgotpassword")]
         [UsedImplicitly]
+        [Post("/account/forgotpassword")]
         Task ForgotPasswordAsync([Body] ForgotPasswordRequest Request);
 
 
-        [Post("/account/resetpassword")]
         [UsedImplicitly]
+        [Post("/account/resetpassword")]
         Task<ResetPasswordResponse> ResetPasswordAsync([Body] ResetPasswordRequest Request);
     }
 }
