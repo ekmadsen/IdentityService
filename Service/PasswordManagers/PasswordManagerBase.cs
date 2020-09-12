@@ -67,14 +67,14 @@ namespace ErikTheCoder.Identity.Service.PasswordManagers
 
         public (bool Valid, List<string> Messages) ValidateComplexity(string Password)
         {
-            bool valid = true;
-            List<string> messages = new List<string>();
+            var valid = true;
+            var messages = new List<string>();
             // Rather than concocting an unreadable regex expression, simply count characters.
-            int lowerAlpha = 0;
-            int upperAlpha = 0;
-            int digits = 0;
-            int special = 0;
-            foreach (char character in Password)
+            var lowerAlpha = 0;
+            var upperAlpha = 0;
+            var digits = 0;
+            var special = 0;
+            foreach (var character in Password)
             {
                 // Determine character type.
                 if (char.IsLower(character)) lowerAlpha++;
