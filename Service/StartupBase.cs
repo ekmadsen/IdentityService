@@ -14,23 +14,22 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Primitives;
 using Microsoft.IdentityModel.Tokens;
 using EnvironmentName = ErikTheCoder.Utilities.EnvironmentName;
 
 
 namespace ErikTheCoder.Identity.Service
 {
-    public abstract class StartupBase : ErikTheCoder.AspNetCore.Middleware.StartupBase
+    public abstract class StartupBase : AspNetCore.Middleware.StartupBase
     {
-        // Define configuration values that do not vary per environment, and therefore are not saved in appsettings.json.
+        // Define configuration values that do not vary per environment, and therefore are not saved in appSettings.json.
         private const int _clockSkewMinutes = 5;
 
 
         [UsedImplicitly]
         public virtual void ConfigureServices(IServiceCollection Services)
         {
-            IAppSettings appSettings = ParseConfigurationFile<IAppSettings, AppSettings>();
+            var appSettings = ParseConfigurationFile<IAppSettings, AppSettings>();
             // Require custom or JWT authentication token.
             // The JWT token specifies the security algorithm used when it was signed (by Identity service).
             Services.AddAuthentication(AuthenticationHandler.AuthenticationScheme).AddErikTheCoderAuthentication(Options =>
@@ -39,8 +38,8 @@ namespace ErikTheCoder.Identity.Service
                 Options.ForwardDefaultSelector = HttpContext =>
                 {
                     // Forward to JWT authentication if custom token is not present.
-                    string token = string.Empty;
-                    if (HttpContext.Request.Headers.TryGetValue(AuthenticationHandler.HttpHeaderName, out StringValues authorizationValues)) token = authorizationValues.ToString();
+                    var token = string.Empty;
+                    if (HttpContext.Request.Headers.TryGetValue(AuthenticationHandler.HttpHeaderName, out var authorizationValues)) token = authorizationValues.ToString();
                     return token.StartsWith(AuthenticationHandler.TokenPrefix)
                         ? AuthenticationHandler.AuthenticationScheme
                         : JwtBearerDefaults.AuthenticationScheme;
@@ -60,7 +59,7 @@ namespace ErikTheCoder.Identity.Service
             });
             // Add MVC, filters, policies, and configure routing.
             Services.AddMvc(Options => Options.Filters.Add(new AuthorizeFilter(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build()))); // Require authorization (permission to access controller actions).
-            Services.AddAuthorization(Options => Options.UseErikTheCoderPolicies()); // Authorize using policies that examine claims.
+            Services.AddAuthorizationCore(Options => Options.UseErikTheCoderPolicies()); // Authorize using policies that examine claims.
             Services.AddRouting(Options => Options.LowercaseUrls = true);
             // Don't use memory cache in services.  Use it in website instead to avoid two network I/O hops:
             //   Website -> Service -> Database
@@ -79,7 +78,7 @@ namespace ErikTheCoder.Identity.Service
         [UsedImplicitly]
         public virtual void Configure(IApplicationBuilder ApplicationBuilder, IHostingEnvironment HostingEnvironment, IAppSettings AppSettings, ILogger Logger)
         {
-            Guid correlationId = Guid.NewGuid();
+            var correlationId = Guid.NewGuid();
             Logger.Log(correlationId, $"{AppSettings.Logger.ProcessName} starting.");
             // Require authentication (identification of user).
             ApplicationBuilder.UseAuthentication();

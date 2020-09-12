@@ -62,13 +62,13 @@ namespace ErikTheCoder.Identity.Service.Controllers
                 user = await connection.QuerySingleOrDefaultAsync<User>(query, Request);
                 if (user != null)
                 {
-                    IPasswordManager passwordManager = _passwordManagerVersions[user.PasswordManagerVersion];
+                    var passwordManager = _passwordManagerVersions[user.PasswordManagerVersion];
                     if (passwordManager.Validate(Request.Password, user.Salt, user.PasswordHash))
                     {
                         // Password is valid.
                         Logger.Log(CorrelationId, $"{Request.Username} user authenticated.");
                         // Add roles, claims, and security token.
-                        List<Task> tasks = new List<Task>
+                        var tasks = new List<Task>
                         {
                             // TODO: Determine if equivalent performance can be achieved by executing two queries in one round-trip to SQL Server via Dapper's QueryMultiple method.
                             // Running two queries concurrently requires "MultipleActiveResultSets=True" included in the SQL Server connection string.
@@ -96,8 +96,8 @@ namespace ErikTheCoder.Identity.Service.Controllers
             // TODO: Validate email address and username are available.
             // TODO: Run multiple SQL insert statements in a transaction.  Rollback if an exception occurs.
             // Validate password meets complexity requirements.
-            IPasswordManager passwordManager = _passwordManagerVersions[_passwordManagerVersion];
-            (bool valid, List<string> messages) = passwordManager.ValidateComplexity(Request.Password);
+            var passwordManager = _passwordManagerVersions[_passwordManagerVersion];
+            var (valid,  messages) = passwordManager.ValidateComplexity(Request.Password);
             if (!valid)
             {
                 return new RegisterResponse
@@ -107,7 +107,7 @@ namespace ErikTheCoder.Identity.Service.Controllers
                 };
             }
             // Add user to database.
-            (string salt, string passwordHash) = passwordManager.Hash(Request.Password);
+            var (salt, passwordHash) = passwordManager.Hash(Request.Password);
             var addUserQueryParameters = new
             {
                 Request.Username,
@@ -128,7 +128,7 @@ namespace ErikTheCoder.Identity.Service.Controllers
                 userId = (int)await connection.ExecuteScalarAsync(addUserQuery, addUserQueryParameters);
             }
             // Add confirmation to database.
-            string code = Guid.NewGuid().ToString();
+            var code = Guid.NewGuid().ToString();
             var confirmationQueryParameters = new
             {
                 userId,
@@ -144,7 +144,7 @@ namespace ErikTheCoder.Identity.Service.Controllers
                 await connection.ExecuteAsync(confirmationQuery, confirmationQueryParameters);
             }
             // Send confirmation email.
-            using (MailMessage email = new MailMessage())
+            using (var email = new MailMessage())
             {
                 // TODO: Upgrade confirmation message from plain text to HTML.
                 // TODO: Move confirmation message text to database.
@@ -152,9 +152,9 @@ namespace ErikTheCoder.Identity.Service.Controllers
                 email.To.Add(new MailAddress(Request.EmailAddress));
                 email.Subject = "account activation";
                 // TODO: Use MVC routing to create email confirmation hyperlink.
-                string confirmationUrl = string.Format(AppSettings.Account.ConfirmationUrl, Request.EmailAddress, code);
+                var confirmationUrl = string.Format(AppSettings.Account.ConfirmationUrl, Request.EmailAddress, code);
                 email.Body = $"Click {confirmationUrl} to confirm your email address.";
-                using (SmtpClient smtpClient = new SmtpClient
+                using (var smtpClient = new SmtpClient
                 {
                     Host = AppSettings.Email.Host,
                     Port = AppSettings.Email.Port,
@@ -194,7 +194,7 @@ namespace ErikTheCoder.Identity.Service.Controllers
                 select @userId";
             using (IDbConnection connection = await _database.OpenConnectionAsync(CorrelationId))
             {
-                int userId = (int)await connection.ExecuteScalarAsync(confirmationQuery, confirmationQueryParameters);
+                var userId = (int)await connection.ExecuteScalarAsync(confirmationQuery, confirmationQueryParameters);
                 if (userId > 0)
                 {
                     // Update user in database.
@@ -216,7 +216,7 @@ namespace ErikTheCoder.Identity.Service.Controllers
             // TODO: Validate email address but don't disclose to user whether an account exists for the email address.
             // TODO: Include username in email message.
             // Add confirmation to database.
-            string code = Guid.NewGuid().ToString();
+            var code = Guid.NewGuid().ToString();
             var confirmationQueryParameters = new
             {
                 Request.EmailAddress,
@@ -235,7 +235,7 @@ namespace ErikTheCoder.Identity.Service.Controllers
                 await connection.ExecuteAsync(confirmationQuery, confirmationQueryParameters);
             }
             // Send confirmation email.
-            using (MailMessage email = new MailMessage())
+            using (var email = new MailMessage())
             {
                 // TODO: Upgrade confirmation message from plain text to HTML.
                 // TODO: Move confirmation message text to database.
@@ -243,9 +243,9 @@ namespace ErikTheCoder.Identity.Service.Controllers
                 email.To.Add(new MailAddress(Request.EmailAddress));
                 email.Subject = "password reset";
                 // TODO: Use MVC routing to create email confirmation hyperlink.
-                string resetUrl = string.Format(AppSettings.Account.ResetUrl, Request.EmailAddress, code);
+                var resetUrl = string.Format(AppSettings.Account.ResetUrl, Request.EmailAddress, code);
                 email.Body = $"Click {resetUrl} to reset your password.";
-                using (SmtpClient smtpClient = new SmtpClient
+                using (var smtpClient = new SmtpClient
                 {
                     Host = AppSettings.Email.Host,
                     Port = AppSettings.Email.Port,
@@ -264,8 +264,8 @@ namespace ErikTheCoder.Identity.Service.Controllers
         {
             // TODO: Run multiple SQL update statements in a transaction.  Rollback if an exception occurs.
             // Validate password meets complexity requirements.
-            IPasswordManager passwordManager = _passwordManagerVersions[_passwordManagerVersion];
-            (bool valid, List<string> messages) = passwordManager.ValidateComplexity(Request.NewPassword);
+            var passwordManager = _passwordManagerVersions[_passwordManagerVersion];
+            var (valid, messages) = passwordManager.ValidateComplexity(Request.NewPassword);
             if (!valid)
             {
                 return new ResetPasswordResponse
@@ -274,7 +274,7 @@ namespace ErikTheCoder.Identity.Service.Controllers
                     Messages = messages
                 };
             }
-            (string salt, string passwordHash) = passwordManager.Hash(Request.NewPassword);
+            var (salt, passwordHash) = passwordManager.Hash(Request.NewPassword);
             // Update confirmation in database.
             var confirmationQueryParameters = new
             {
@@ -292,7 +292,7 @@ namespace ErikTheCoder.Identity.Service.Controllers
                 select @userId";
             using (IDbConnection connection = await _database.OpenConnectionAsync(CorrelationId))
             {
-                int userId = (int)await connection.ExecuteScalarAsync(confirmationQuery, confirmationQueryParameters);
+                var userId = (int)await connection.ExecuteScalarAsync(confirmationQuery, confirmationQueryParameters);
                 if (userId > 0)
                 {
                     // Update user in database.
@@ -330,8 +330,8 @@ namespace ErikTheCoder.Identity.Service.Controllers
                 inner join [Identity].Roles r on ur.RoleId = r.Id
                 where u.Id = @id
                 order by r.Name asc";
-            IEnumerable<Role> roles = await Connection.QueryAsync<Role>(query, ApplicationUser);
-            foreach (Role role in roles)
+            var roles = await Connection.QueryAsync<Role>(query, ApplicationUser);
+            foreach (var role in roles)
             {
                 Logger.Log(CorrelationId, $"{role.Name} role");
                 ApplicationUser.Roles.Add(role.Name);
@@ -349,8 +349,8 @@ namespace ErikTheCoder.Identity.Service.Controllers
                 inner join [Identity].Claims c on uc.ClaimId = c.Id
                 where u.Id = @id
                 order by c.[Type] asc, uc.[Value] asc";
-            IEnumerable<Entities.Claim> claims = await Connection.QueryAsync<Entities.Claim>(query, ApplicationUser);
-            foreach (Entities.Claim claim in claims)
+            var claims = await Connection.QueryAsync<Entities.Claim>(query, ApplicationUser);
+            foreach (var claim in claims)
             {
                 Logger.Log(CorrelationId, $"Type = {claim.Type}, Value = {claim.Value} claim");
                 if (!ApplicationUser.Claims.ContainsKey(claim.Type)) ApplicationUser.Claims.Add(claim.Type, new HashSet<string>(StringComparer.CurrentCultureIgnoreCase));
@@ -361,23 +361,24 @@ namespace ErikTheCoder.Identity.Service.Controllers
 
         protected virtual void AddSecurityToken(User ApplicationUser)
         {
-            List<Claim> claims = ApplicationUser.GetClaims();
+            var claims = ApplicationUser.GetClaims();
             // Add valid time range claims.
-            int credentialExpirationMinutes = ApplicationUser.Roles.Contains(Policy.Admin)
+            var credentialExpirationMinutes = ApplicationUser.Roles.Contains(Policy.Admin)
                 ? AppSettings.AdminCredentialExpirationMinutes
                 : AppSettings.NonAdminCredentialExpirationMinutes;
-            DateTimeOffset notBefore = DateTimeOffset.Now;
-            DateTimeOffset expires = DateTimeOffset.Now.AddMinutes(credentialExpirationMinutes);
+            var notBefore = DateTimeOffset.Now;
+            var expires = DateTimeOffset.Now.AddMinutes(credentialExpirationMinutes);
             claims.Add(new Claim(JwtRegisteredClaimNames.Nbf, notBefore.ToUnixTimeSeconds().ToString()));
             claims.Add(new Claim(JwtRegisteredClaimNames.Exp, expires.ToUnixTimeSeconds().ToString()));
             // Create token header.
-            SymmetricSecurityKey securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(AppSettings.CredentialSecret));
-            SigningCredentials signingCredentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-            JwtHeader tokenHeader = new JwtHeader(signingCredentials);
+            // TODO: Should RngCryptoRfc2898 be used to get bytes from credential secret?
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(AppSettings.CredentialSecret));
+            var signingCredentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+            var tokenHeader = new JwtHeader(signingCredentials);
             // Create token payload.
-            JwtPayload tokenPayload = new JwtPayload(claims);
-            JwtSecurityToken token = new JwtSecurityToken(tokenHeader, tokenPayload);
-            JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
+            var tokenPayload = new JwtPayload(claims);
+            var token = new JwtSecurityToken(tokenHeader, tokenPayload);
+            var tokenHandler = new JwtSecurityTokenHandler();
             // Create signed token.
             ApplicationUser.SecurityToken = tokenHandler.WriteToken(token);
         }
