@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using ErikTheCoder.Utilities;
 
 
-namespace ErikTheCoder.Identity.Service.PasswordManagers
+namespace ErikTheCoder.Identity.Domain.PasswordManagers
 {
-    public abstract class PasswordManagerBase : IPasswordManager
+    internal abstract class PasswordManagerBase : IPasswordManager
     {
         protected IThreadsafeRandom Random;
         protected readonly int SaltLength;

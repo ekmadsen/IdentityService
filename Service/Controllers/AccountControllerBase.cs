@@ -49,127 +49,14 @@ namespace ErikTheCoder.Identity.Service.Controllers
         [HttpPost("login")]
         public virtual async Task<User> LoginAsync([FromBody] LoginRequest Request)
         {
-            // Validate password against hash stored in database.
-            const string query = @"
-                select u.id, u.Username, u.PasswordManagerVersion, u.Salt, u.PasswordHash, u.EmailAddress, u.FirstName, u.LastName
-                from [Identity].Users u
-                where u.Username = @username
-                and u.Confirmed = 1
-                and u.Enabled = 1";
-            User user;
-            using (IDbConnection connection = await _database.OpenConnectionAsync(CorrelationId))
-            {
-                user = await connection.QuerySingleOrDefaultAsync<User>(query, Request);
-                if (user != null)
-                {
-                    var passwordManager = _passwordManagerVersions[user.PasswordManagerVersion];
-                    if (passwordManager.Validate(Request.Password, user.Salt, user.PasswordHash))
-                    {
-                        // Password is valid.
-                        Logger.Log(CorrelationId, $"{Request.Username} user authenticated.");
-                        // Add roles, claims, and security token.
-                        var tasks = new List<Task>
-                        {
-                            // TODO: Determine if equivalent performance can be achieved by executing two queries in one round-trip to SQL Server via Dapper's QueryMultiple method.
-                            // Running two queries concurrently requires "MultipleActiveResultSets=True" included in the SQL Server connection string.
-                            AddRolesAsync(connection, user),
-                            AddClaimsAsync(connection, user)
-                        };
-                        await Task.WhenAll(tasks);
-                        AddSecurityToken(user);
-                    }
-                    else
-                    {
-                        // Password is invalid.
-                        Logger.Log(CorrelationId, $"{Request.Username} user not authenticated.  {_invalidCredentials}");
-                        user = null;
-                    }
-                }
-            }
-            return user;
+            
         }
 
 
         [HttpPost("register")]
         public virtual async Task<RegisterResponse> RegisterAsync([FromBody] RegisterRequest Request)
         {
-            // TODO: Validate email address and username are available.
-            // TODO: Run multiple SQL insert statements in a transaction.  Rollback if an exception occurs.
-            // Validate password meets complexity requirements.
-            var passwordManager = _passwordManagerVersions[_passwordManagerVersion];
-            var (valid,  messages) = passwordManager.ValidateComplexity(Request.Password);
-            if (!valid)
-            {
-                return new RegisterResponse
-                {
-                    PasswordValid = false,
-                    Messages = messages
-                };
-            }
-            // Add user to database.
-            var (salt, passwordHash) = passwordManager.Hash(Request.Password);
-            var addUserQueryParameters = new
-            {
-                Request.Username,
-                PasswordManagerVersion = _passwordManagerVersion,
-                salt,
-                passwordHash,
-                Request.EmailAddress,
-                Request.FirstName,
-                Request.LastName
-            };
-            const string addUserQuery = @"
-                insert into [Identity].Users (Username, Enabled, Confirmed, PasswordManagerVersion, Salt, PasswordHash, EmailAddress, FirstName, LastName)
-                output inserted.id
-                values (@username, 1, 0, @passwordManagerVersion, @salt, @passwordHash, @emailAddress, @firstName, @lastName)";
-            int userId;
-            using (IDbConnection connection = await _database.OpenConnectionAsync(CorrelationId))
-            {
-                userId = (int)await connection.ExecuteScalarAsync(addUserQuery, addUserQueryParameters);
-            }
-            // Add confirmation to database.
-            var code = Guid.NewGuid().ToString();
-            var confirmationQueryParameters = new
-            {
-                userId,
-                Request.EmailAddress,
-                code,
-                Sent = DateTime.Now
-            };
-            const string confirmationQuery = @"
-                insert into [Identity].UserConfirmations (UserId, EmailAddress, Code, Sent)
-                values (@userId, @emailAddress, @code, @sent)";
-            using (IDbConnection connection = await _database.OpenConnectionAsync(CorrelationId))
-            {
-                await connection.ExecuteAsync(confirmationQuery, confirmationQueryParameters);
-            }
-            // Send confirmation email.
-            using (var email = new MailMessage())
-            {
-                // TODO: Upgrade confirmation message from plain text to HTML.
-                // TODO: Move confirmation message text to database.
-                email.From = new MailAddress(AppSettings.Email.From);
-                email.To.Add(new MailAddress(Request.EmailAddress));
-                email.Subject = "account activation";
-                // TODO: Use MVC routing to create email confirmation hyperlink.
-                var confirmationUrl = string.Format(AppSettings.Account.ConfirmationUrl, Request.EmailAddress, code);
-                email.Body = $"Click {confirmationUrl} to confirm your email address.";
-                using (var smtpClient = new SmtpClient
-                {
-                    Host = AppSettings.Email.Host,
-                    Port = AppSettings.Email.Port,
-                    EnableSsl = AppSettings.Email.EnableSsl,
-                    Credentials = new NetworkCredential(AppSettings.Email.Username, AppSettings.Email.Password)
-                })
-                {
-                    smtpClient.Send(email);
-                }
-            }
-            return new RegisterResponse
-            {
-                PasswordValid = true,
-                Messages = messages
-            };
+            
         }
 
 
