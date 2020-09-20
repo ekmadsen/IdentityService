@@ -1,6 +1,9 @@
-﻿namespace ErikTheCoder.Identity.Domain
+﻿using ErikTheCoder.Identity.Domain;
+
+
+namespace ErikTheCoder.Identity.Service
 {
-    internal class EmailSettings : IEmailSettings
+    public class EmailSettings : IEmailSettings
     {
         public string From { get; set; }
         public string ConfirmationUrl { get; set; }

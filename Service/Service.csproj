@@ -12,7 +12,7 @@
     <RepositoryType>GitHub</RepositoryType>
     <PackageTags>identity user-management credential-storage role-management</PackageTags>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.10</Version>
+    <Version>1.0.11</Version>
     <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
   </PropertyGroup>
 
@@ -29,7 +29,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="ErikTheCoder.AspNetCore.Middleware" Version="1.0.33" />
+    <PackageReference Include="ErikTheCoder.AspNetCore.Middleware" Version="1.0.34" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="2.2.0" />
     <PackageReference Include="NuGet.CommandLine" Version="5.7.0">
       <PrivateAssets>all</PrivateAssets>

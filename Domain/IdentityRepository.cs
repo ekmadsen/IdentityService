@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.Common;
 using System.Net;
 using System.Net.Mail;
 using System.Threading.Tasks;
@@ -20,16 +19,14 @@ namespace ErikTheCoder.Identity.Domain
     internal class IdentityRepository : RepositoryBase, IIdentityRepository
     {
         private const int _passwordManagerVersion = 3;
-        private readonly ILoggedDatabase _database;
-        private readonly IIdentityFactory _factory;
-        private readonly IPasswordManagerVersions _passwordManagerVersions;
+        private readonly IdentityRecordFactory _factory;
+        private readonly PasswordManagerVersions _passwordManagerVersions;
         private readonly IEmailSettings _emailSettings;
 
 
-        public IdentityRepository(ILogger Logger, ICorrelationIdAccessor CorrelationIdAccessor, ILoggedDatabase Database, IIdentityFactory Factory, IPasswordManagerVersions PasswordManagerVersions, IEmailSettings EmailSettings) :
-            base(Logger, CorrelationIdAccessor)
+        public IdentityRepository(ILogger Logger, ICorrelationIdAccessor CorrelationIdAccessor, ILoggedDatabase Database, IdentityRecordFactory Factory, PasswordManagerVersions PasswordManagerVersions, IEmailSettings EmailSettings) :
+            base(Logger, CorrelationIdAccessor, Database)
         {
-            _database = Database;
             _factory = Factory;
             _passwordManagerVersions = PasswordManagerVersions;
             _emailSettings = EmailSettings;
@@ -45,7 +42,7 @@ namespace ErikTheCoder.Identity.Domain
                 where u.Username = @username
                 and u.Confirmed = 1
                 and u.Enabled = 1";
-            var connection = DbConnection ?? await _database.OpenConnectionAsync(CorrelationId);
+            var (connection, transaction, disposeDbResources) = await GetDbResourcesAsync();
             try
             {
                 var userRecord = await connection.QuerySingleOrDefaultAsync<UserRecord>(query, Request);
@@ -65,24 +62,24 @@ namespace ErikTheCoder.Identity.Domain
                 // Password is valid.
                 Logger.Log(CorrelationId, $"{Request.Username} user authenticated.");
                 // Add roles and claims.
-                // Normally domain class constructors accept Record parameters.  Because User is defined in another assembly, set properties instead.
-                var user = _factory.CreateUser();
-                user.FirstName = userRecord.FirstName;
-                user.EmailAddress = userRecord.EmailAddress;
-                user.Id = userRecord.Id;
-                user.LastName = userRecord.LastName;
-                user.PasswordHash = userRecord.PasswordHash;
-                user.PasswordManagerVersion = userRecord.PasswordManagerVersion;
-                user.Salt = userRecord.Salt;
+                var user = _factory.CreateUser(userRecord);
                 // TODO: Execute roles and claims queries in one round-trip to SQL Server via Dapper's QueryMultiple method.
                 await AddRolesAsync(connection, user);
                 await AddClaimsAsync(connection, user);
                 return user;
             }
+            catch
+            {
+                transaction?.TryRollback();
+                throw;
+            }
             finally
             {
-                // Dispose local DB connection only to prevent interrupting Unit of Work transaction (that sets a shared DB connection on multiple repositories).
-                if (DbConnection == null) connection?.Dispose();
+                if (disposeDbResources)
+                {
+                    connection.Dispose();
+                    transaction?.Dispose();
+                }
             }
         }
 
@@ -140,30 +137,30 @@ namespace ErikTheCoder.Identity.Domain
                     Messages = messages
                 };
             }
-            // Add user to database.
-            var (salt, passwordHash) = passwordManager.Hash(Request.Password);
-            var addUserQueryParameters = new
+            string code;
+            var (connection, transaction, disposeDbResources) = await GetDbResourcesAsync();
+            try
             {
-                Request.Username,
-                PasswordManagerVersion = _passwordManagerVersion,
-                salt,
-                passwordHash,
-                Request.EmailAddress,
-                Request.FirstName,
-                Request.LastName
-            };
-            const string addUserQuery = @"
+                // Add user to database.
+                var (salt, passwordHash) = passwordManager.Hash(Request.Password);
+                var addUserQueryParameters = new
+                {
+                    Request.Username,
+                    PasswordManagerVersion = _passwordManagerVersion,
+                    salt,
+                    passwordHash,
+                    Request.EmailAddress,
+                    Request.FirstName,
+                    Request.LastName
+                };
+                const string addUserQuery = @"
                 insert into [Identity].Users (Username, Enabled, Confirmed, PasswordManagerVersion, Salt, PasswordHash, EmailAddress, FirstName, LastName)
                 output inserted.id
                 values (@username, 1, 0, @passwordManagerVersion, @salt, @passwordHash, @emailAddress, @firstName, @lastName)";
-            var code = Guid.NewGuid().ToString();
-            var connection = DbConnection ?? await _database.OpenConnectionAsync(CorrelationId);
-            var transaction = DbConnection == null ? connection.BeginTransaction() : null;
-            try
-            {
+                code = Guid.NewGuid().ToString();
                 var userId = (int) await connection.ExecuteScalarAsync(addUserQuery, addUserQueryParameters);
                 // Add confirmation to database.
-                var confirmationQueryParameters = new
+                var confirmationParam = new
                 {
                     userId,
                     Request.EmailAddress,
@@ -173,18 +170,21 @@ namespace ErikTheCoder.Identity.Domain
                 const string confirmationQuery = @"
                 insert into [Identity].UserConfirmations (UserId, EmailAddress, Code, Sent)
                 values (@userId, @emailAddress, @code, @sent)";
-                await connection.ExecuteAsync(confirmationQuery, confirmationQueryParameters);
+                await connection.ExecuteAsync(confirmationQuery, confirmationParam);
                 transaction?.TryCommit();
             }
             catch
             {
                 transaction?.TryRollback();
+                throw;
             }
             finally
             {
-                // Dispose local DB connection and transactions only to prevent interrupting Unit of Work transaction (that sets a shared DB connection on multiple repositories).
-                if (DbConnection == null) connection?.Dispose();
-                transaction?.Dispose();
+                if (disposeDbResources)
+                {
+                    connection.Dispose();
+                    transaction?.Dispose();
+                }
             }
             // Send confirmation email.
             using (var email = new MailMessage())

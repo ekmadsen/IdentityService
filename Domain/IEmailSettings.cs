@@ -1,13 +1,16 @@
-﻿namespace ErikTheCoder.Identity.Domain
+﻿using JetBrains.Annotations;
+
+
+namespace ErikTheCoder.Identity.Domain
 {
     public interface IEmailSettings
     {
-        string From { get; set; }
-        string ConfirmationUrl { get; set; }
-        string Host { get; set; }
-        int Port { get; set; }
-        bool EnableSsl { get; set; }
-        string Username { get; set; }
-        string Password { get; set; }
+        string From { get; [UsedImplicitly] set; }
+        string ConfirmationUrl { get; [UsedImplicitly] set; }
+        string Host { get; [UsedImplicitly] set; }
+        int Port { get; [UsedImplicitly] set; }
+        bool EnableSsl { get; [UsedImplicitly] set; }
+        string Username { get; [UsedImplicitly] set; }
+        string Password { get; [UsedImplicitly] set; }
     }
 }

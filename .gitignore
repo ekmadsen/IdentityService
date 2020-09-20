@@ -19,3 +19,6 @@
 /Service/Service.csproj.user
 /Service/bin/Release
 /Service/bin/Debug
+/Domain/Domain.csproj.user
+/Domain/bin
+/Domain/obj

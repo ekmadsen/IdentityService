@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 
 namespace ErikTheCoder.Identity.Domain.PasswordManagers
 {
-    internal class PasswordManagerVersions : Dictionary<int, IPasswordManager>, IPasswordManagerVersions
+    internal class PasswordManagerVersions : Dictionary<int, IPasswordManager>
     {
         public PasswordManagerVersions(IThreadsafeRandom Random)
         {

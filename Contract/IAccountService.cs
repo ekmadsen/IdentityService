@@ -23,18 +23,18 @@ namespace ErikTheCoder.Identity.Contract
         Task<RegisterResponse> RegisterAsync([Body] RegisterRequest Request);
 
 
-        [UsedImplicitly]
-        [Post("/account/confirm")]
-        Task ConfirmAsync([Body] ConfirmRequest Request);
+        //[UsedImplicitly]
+        //[Post("/account/confirm")]
+        //Task ConfirmAsync([Body] ConfirmRequest Request);
 
 
-        [UsedImplicitly]
-        [Post("/account/forgotpassword")]
-        Task ForgotPasswordAsync([Body] ForgotPasswordRequest Request);
+        //[UsedImplicitly]
+        //[Post("/account/forgotpassword")]
+        //Task ForgotPasswordAsync([Body] ForgotPasswordRequest Request);
 
 
-        [UsedImplicitly]
-        [Post("/account/resetpassword")]
-        Task<ResetPasswordResponse> ResetPasswordAsync([Body] ResetPasswordRequest Request);
+        //[UsedImplicitly]
+        //[Post("/account/resetpassword")]
+        //Task<ResetPasswordResponse> ResetPasswordAsync([Body] ResetPasswordRequest Request);
     }
 }
