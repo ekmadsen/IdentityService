@@ -4,6 +4,18 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <RootNamespace>ErikTheCoder.Identity.Domain</RootNamespace>
     <AssemblyName>ErikTheCoder.Identity.Domain</AssemblyName>
+    <Version>1.0.14</Version>
+    <PackageId>ErikTheCoder.Identity.Domain</PackageId>
+    <Authors>Erik Madsen</Authors>
+    <Company>Erik Madsen</Company>
+    <Description>Application Programming Interface (API) for Identity service.</Description>
+    <Copyright>2020</Copyright>
+    <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
+    <PackageProjectUrl>https://github.com/ekmadsen/IdentityService</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/ekmadsen/IdentityService</RepositoryUrl>
+    <RepositoryType>GitHub</RepositoryType>
+    <PackageTags>identity user-management credential-storage role-management</PackageTags>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -19,6 +31,13 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Contract\Contract.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\LICENSE.md">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>

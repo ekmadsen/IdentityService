@@ -6,13 +6,13 @@
     <AssemblyName>ErikTheCoder.Identity.Service</AssemblyName>
     <Authors>Erik Madsen</Authors>
     <Description>Startup and controller base classes to host Identity service.</Description>
-    <Copyright>2019</Copyright>
+    <Copyright>2020</Copyright>
     <PackageProjectUrl>https://github.com/ekmadsen/IdentityService</PackageProjectUrl>
     <RepositoryUrl>https://github.com/ekmadsen/IdentityService</RepositoryUrl>
     <RepositoryType>GitHub</RepositoryType>
     <PackageTags>identity user-management credential-storage role-management</PackageTags>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.13</Version>
+    <Version>1.0.14</Version>
     <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
   </PropertyGroup>
 
@@ -37,10 +37,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Domain\Domain.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Content Update="appSettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -51,6 +47,10 @@
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Domain\Domain.csproj" />
   </ItemGroup>
 
 </Project>
