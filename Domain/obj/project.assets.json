@@ -14,7 +14,7 @@
           "lib/netstandard2.0/Dapper.dll": {}
         }
       },
-      "ErikTheCoder.Data/1.0.9": {
+      "ErikTheCoder.Data/1.0.10": {
         "type": "package",
         "dependencies": {
           "ErikTheCoder.Logging": "1.0.11",
@@ -28,10 +28,10 @@
           "lib/netstandard2.0/ErikTheCoder.Data.dll": {}
         }
       },
-      "ErikTheCoder.Domain/1.0.6": {
+      "ErikTheCoder.Domain/1.0.8": {
         "type": "package",
         "dependencies": {
-          "ErikTheCoder.Data": "1.0.9",
+          "ErikTheCoder.Data": "1.0.10",
           "ErikTheCoder.Logging": "1.0.12",
           "JetBrains.Annotations": "2020.1.0"
         },
@@ -584,7 +584,7 @@
           "lib/netstandard2.0/System.Threading.Tasks.Extensions.dll": {}
         }
       },
-      "ErikTheCoder.Identity.Contract/1.0.10": {
+      "ErikTheCoder.Identity.Contract/1.0.11": {
         "type": "project",
         "framework": ".NETStandard,Version=v2.0",
         "dependencies": {
@@ -617,28 +617,28 @@
         "lib/netstandard2.0/Dapper.xml"
       ]
     },
-    "ErikTheCoder.Data/1.0.9": {
-      "sha512": "m5TNoIlHY9MLBEzb9TwGUs5Nr0Hnj8xTsyzJSx+viWQyCSYsptWpal5s7qbmaLKxS+KQPG7LLeMPqzfiBnjJmg==",
+    "ErikTheCoder.Data/1.0.10": {
+      "sha512": "afe0KKA5KABevg67q8NCE6SZmKaUjy9xcoAQj5/+f2cuiGDu6Rd1l+TMNX3rXh3zeiQDwI3u4ytREwayL7WthA==",
       "type": "package",
-      "path": "erikthecoder.data/1.0.9",
+      "path": "erikthecoder.data/1.0.10",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "LICENSE.md",
-        "erikthecoder.data.1.0.9.nupkg.sha512",
+        "erikthecoder.data.1.0.10.nupkg.sha512",
         "erikthecoder.data.nuspec",
         "lib/netstandard2.0/ErikTheCoder.Data.dll"
       ]
     },
-    "ErikTheCoder.Domain/1.0.6": {
-      "sha512": "F0gFscA5EAMDk4C1u2qimFLBU/aE5zryo2dbBfBfmDeo3uGfCrwz5xmt28sKc7O++tCP5TIlPryLSKQ4BJX/Uw==",
+    "ErikTheCoder.Domain/1.0.8": {
+      "sha512": "BFtT3C4Grk0ZTIvQmdD/noE9ubRXR+evjEQ2bdXAfjkPc3BGxIpRLGCRAbOYQ+EQo532ekPBcGkM0Gr815x86A==",
       "type": "package",
-      "path": "erikthecoder.domain/1.0.6",
+      "path": "erikthecoder.domain/1.0.8",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "LICENSE.md",
-        "erikthecoder.domain.1.0.6.nupkg.sha512",
+        "erikthecoder.domain.1.0.8.nupkg.sha512",
         "erikthecoder.domain.nuspec",
         "lib/netstandard2.0/ErikTheCoder.Domain.dll"
       ]
@@ -2648,7 +2648,7 @@
         "version.txt"
       ]
     },
-    "ErikTheCoder.Identity.Contract/1.0.10": {
+    "ErikTheCoder.Identity.Contract/1.0.11": {
       "type": "project",
       "path": "../Contract/Contract.csproj",
       "msbuildProject": "../Contract/Contract.csproj"
@@ -2656,9 +2656,9 @@
   },
   "projectFileDependencyGroups": {
     ".NETStandard,Version=v2.0": [
-      "ErikTheCoder.Data >= 1.0.9",
-      "ErikTheCoder.Domain >= 1.0.6",
-      "ErikTheCoder.Identity.Contract >= 1.0.10",
+      "ErikTheCoder.Data >= 1.0.10",
+      "ErikTheCoder.Domain >= 1.0.8",
+      "ErikTheCoder.Identity.Contract >= 1.0.11",
       "ErikTheCoder.Utilities >= 1.0.11",
       "Microsoft.AspNetCore.Cryptography.KeyDerivation >= 3.1.8",
       "NETStandard.Library >= 2.0.3"
@@ -2716,11 +2716,11 @@
         "dependencies": {
           "ErikTheCoder.Data": {
             "target": "Package",
-            "version": "[1.0.9, )"
+            "version": "[1.0.10, )"
           },
           "ErikTheCoder.Domain": {
             "target": "Package",
-            "version": "[1.0.6, )"
+            "version": "[1.0.8, )"
           },
           "ErikTheCoder.Utilities": {
             "target": "Package",

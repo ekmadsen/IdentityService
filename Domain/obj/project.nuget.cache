@@ -1,12 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "he/191Jtj4MegMoTlybKM6lvutM6kNoV4j5qjGq87k99wi8hrfMXa4ebCeAUD6FjZsM8CV4XD/I//s2GE5xTYw==",
+  "dgSpecHash": "Ty5hx6rNDYr7CngCbAXvYdvMOR4gk2bKM1OFyJxfDt2Y2CMWZReTWp1nUVclGpKdzcYr8/iIZMlYnoC29UuDBA==",
   "success": true,
   "projectFilePath": "C:\\Users\\Erik\\Documents\\Visual Studio 2019\\Projects\\IdentityService\\Domain\\Domain.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Erik\\.nuget\\packages\\dapper\\2.0.35\\dapper.2.0.35.nupkg.sha512",
-    "C:\\Users\\Erik\\.nuget\\packages\\erikthecoder.data\\1.0.9\\erikthecoder.data.1.0.9.nupkg.sha512",
-    "C:\\Users\\Erik\\.nuget\\packages\\erikthecoder.domain\\1.0.6\\erikthecoder.domain.1.0.6.nupkg.sha512",
+    "C:\\Users\\Erik\\.nuget\\packages\\erikthecoder.data\\1.0.10\\erikthecoder.data.1.0.10.nupkg.sha512",
+    "C:\\Users\\Erik\\.nuget\\packages\\erikthecoder.domain\\1.0.8\\erikthecoder.domain.1.0.8.nupkg.sha512",
     "C:\\Users\\Erik\\.nuget\\packages\\erikthecoder.logging\\1.0.12\\erikthecoder.logging.1.0.12.nupkg.sha512",
     "C:\\Users\\Erik\\.nuget\\packages\\erikthecoder.servicecontract\\1.0.18\\erikthecoder.servicecontract.1.0.18.nupkg.sha512",
     "C:\\Users\\Erik\\.nuget\\packages\\erikthecoder.utilities\\1.0.11\\erikthecoder.utilities.1.0.11.nupkg.sha512",
@@ -49,8 +49,7 @@
     "C:\\Users\\Erik\\.nuget\\packages\\system.text.encodings.web\\4.7.1\\system.text.encodings.web.4.7.1.nupkg.sha512",
     "C:\\Users\\Erik\\.nuget\\packages\\system.text.json\\4.7.2\\system.text.json.4.7.2.nupkg.sha512",
     "C:\\Users\\Erik\\.nuget\\packages\\system.threading.tasks\\4.3.0\\system.threading.tasks.4.3.0.nupkg.sha512",
-    "C:\\Users\\Erik\\.nuget\\packages\\system.threading.tasks.extensions\\4.5.4\\system.threading.tasks.extensions.4.5.4.nupkg.sha512",
-    "C:\\Users\\Erik\\.nuget\\packages\\erikthecoder.identity.contract\\1.0.10\\erikthecoder.identity.contract.1.0.10.nupkg.sha512"
+    "C:\\Users\\Erik\\.nuget\\packages\\system.threading.tasks.extensions\\4.5.4\\system.threading.tasks.extensions.4.5.4.nupkg.sha512"
   ],
   "logs": []
 }

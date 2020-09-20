@@ -5,7 +5,7 @@
   },
   "projects": {
     "C:\\Users\\Erik\\Documents\\Visual Studio 2019\\Projects\\IdentityService\\Contract\\Contract.csproj": {
-      "version": "1.0.10",
+      "version": "1.0.11",
       "restore": {
         "projectUniqueName": "C:\\Users\\Erik\\Documents\\Visual Studio 2019\\Projects\\IdentityService\\Contract\\Contract.csproj",
         "projectName": "ErikTheCoder.Identity.Contract",
@@ -125,11 +125,11 @@
           "dependencies": {
             "ErikTheCoder.Data": {
               "target": "Package",
-              "version": "[1.0.9, )"
+              "version": "[1.0.10, )"
             },
             "ErikTheCoder.Domain": {
               "target": "Package",
-              "version": "[1.0.6, )"
+              "version": "[1.0.8, )"
             },
             "ErikTheCoder.Utilities": {
               "target": "Package",
