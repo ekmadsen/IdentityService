@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <RootNamespace>ErikTheCoder.Identity.Domain</RootNamespace>
     <AssemblyName>ErikTheCoder.Identity.Domain</AssemblyName>
-    <Version>1.0.14</Version>
+    <Version>1.0.15</Version>
     <PackageId>ErikTheCoder.Identity.Domain</PackageId>
     <Authors>Erik Madsen</Authors>
     <Company>Erik Madsen</Company>

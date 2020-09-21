@@ -19,67 +19,67 @@ namespace ErikTheCoder.Identity.Service
     public abstract class StartupBase : AspNetCore.Middleware.StartupBase
     {
         // Define configuration values that do not vary per environment, and therefore are not saved in appSettings.json.
-        [UsedImplicitly] private const int _clockSkewMinutes = 5;
+        [UsedImplicitly] protected const int ClockSkewMinutes = 5;
 
 
         protected abstract string ConfirmationUrl { get; }
 
 
         [UsedImplicitly]
-        public virtual void ConfigureServices(IServiceCollection Services)
-        {
-            // JwtBearer cannot be referenced in .NET Standard class library (it requires .NET Core App Framework).
-            // Implement this method in service that hosts the Identity Account Controller.
+        public abstract void ConfigureServices(IServiceCollection Services);
+        //{
+        //     JwtBearer cannot be referenced in .NET Standard class library (it requires .NET Core App Framework).
+        //     Implement this method in service that hosts the Identity Account Controller.
 
-            // <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
-            // <PackageReference Include="System.IdentityModel.Tokens.Jwt" />
-            // using System.Text;
-            // using Microsoft.AspNetCore.Authentication.JwtBearer;
-            // using Microsoft.AspNetCore.Authorization;
-            // using Microsoft.AspNetCore.Mvc.Authorization;
-            // using Microsoft.IdentityModel.Tokens;
+        //     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
+        //     <PackageReference Include="System.IdentityModel.Tokens.Jwt" />
+        //     using System.Text;
+        //     using Microsoft.AspNetCore.Authentication.JwtBearer;
+        //     using Microsoft.AspNetCore.Authorization;
+        //     using Microsoft.AspNetCore.Mvc.Authorization;
+        //     using Microsoft.IdentityModel.Tokens;
 
-            //var appSettings = ParseConfigurationFile<IAppSettings, AppSettings>();
-            //// Require custom or JWT authentication token.
-            //// The JWT token specifies the security algorithm used when it was signed (by Identity service).
-            //Services.AddAuthentication(AuthenticationHandler.AuthenticationScheme).AddErikTheCoderAuthentication(Options =>
-            //{
-            //    Options.Identities = appSettings.AuthenticationIdentities;
-            //    Options.ForwardDefaultSelector = HttpContext =>
-            //    {
-            //        // Forward to JWT authentication if custom token is not present.
-            //        var token = string.Empty;
-            //        if (HttpContext.Request.Headers.TryGetValue(AuthenticationHandler.HttpHeaderName, out var authorizationValues)) token = authorizationValues.ToString();
-            //        return token.StartsWith(AuthenticationHandler.TokenPrefix)
-            //            ? AuthenticationHandler.AuthenticationScheme
-            //            : JwtBearerDefaults.AuthenticationScheme;
-            //    };
-            //})
-            //.AddJwtBearer(Options =>
-            //{
-            //    Options.TokenValidationParameters = new TokenValidationParameters
-            //    {
-            //        ValidateIssuerSigningKey = true,
-            //        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(appSettings.CredentialSecret)),
-            //        ValidateIssuer = false,
-            //        ValidateAudience = false,
-            //        ValidateLifetime = true,
-            //        ClockSkew = TimeSpan.FromMinutes(_clockSkewMinutes)
-            //    };
-            //});
-            //// Add MVC, filters, policies, and configure routing.
-            //Services.AddMvc(Options => Options.Filters.Add(new AuthorizeFilter(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build()))); // Require authorization (permission to access controller actions).
-            //Services.AddAuthorizationCore(Options => Options.UseErikTheCoderPolicies()); // Authorize using policies that examine claims.
-            //Services.AddRouting(Options => Options.LowercaseUrls = true);
+        //    var appSettings = ParseConfigurationFile<IAppSettings, AppSettings>();
+        //    // Require custom or JWT authentication token.
+        //    // The JWT token specifies the security algorithm used when it was signed (by Identity service).
+        //    Services.AddAuthentication(AuthenticationHandler.AuthenticationScheme).AddErikTheCoderAuthentication(Options =>
+        //    {
+        //        Options.Identities = appSettings.AuthenticationIdentities;
+        //        Options.ForwardDefaultSelector = HttpContext =>
+        //        {
+        //            // Forward to JWT authentication if custom token is not present.
+        //            var token = string.Empty;
+        //            if (HttpContext.Request.Headers.TryGetValue(AuthenticationHandler.HttpHeaderName, out var authorizationValues)) token = authorizationValues.ToString();
+        //            return token.StartsWith(AuthenticationHandler.TokenPrefix)
+        //                ? AuthenticationHandler.AuthenticationScheme
+        //                : JwtBearerDefaults.AuthenticationScheme;
+        //        };
+        //    })
+        //    .AddJwtBearer(Options =>
+        //    {
+        //        Options.TokenValidationParameters = new TokenValidationParameters
+        //        {
+        //            ValidateIssuerSigningKey = true,
+        //            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(appSettings.CredentialSecret)),
+        //            ValidateIssuer = false,
+        //            ValidateAudience = false,
+        //            ValidateLifetime = true,
+        //            ClockSkew = TimeSpan.FromMinutes(ClockSkewMinutes)
+        //        };
+        //    });
+        //    // Add MVC, filters, policies, and configure routing.
+        //    Services.AddMvc(Options => Options.Filters.Add(new AuthorizeFilter(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build()))); // Require authorization (permission to access controller actions).
+        //    Services.AddAuthorizationCore(Options => Options.UseErikTheCoderPolicies()); // Authorize using policies that examine claims.
+        //    Services.AddRouting(Options => Options.LowercaseUrls = true);
 
-            //// Don't use memory cache in services.  Use it in website instead to avoid two network I/O hops:
-            ////   Website -> Service -> Database
-            ////   Website <- Service <- Database
-            //// This guarantees service always provide current data.
+        //    // Don't use memory cache in services.  Use it in website instead to avoid two network I/O hops:
+        //    //   Website -> Service -> Database
+        //    //   Website <- Service <- Database
+        //    // This guarantees service always provide current data.
 
-            //// Configure dependency injection.
-            //ConfigureDependencyInjection(Services, appSettings);
-        }
+        //    // Configure dependency injection.
+        //    ConfigureDependencyInjection(Services, appSettings);
+        //}
 
 
         [UsedImplicitly]
