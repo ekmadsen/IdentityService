@@ -37,7 +37,7 @@ namespace ErikTheCoder.Identity.Service
                 From = AppSettings.Email.From
             });
             Services.AddSingleton<IIdentityFactory, IdentityFactory>();
-            Services.AddScoped(ServiceProvider => ServiceProvider.GetService<IdentityFactory>().CreateIdentityRepository());
+            Services.AddScoped(ServiceProvider => ServiceProvider.GetService<IIdentityFactory>().CreateIdentityRepository());
         }
     }
 }

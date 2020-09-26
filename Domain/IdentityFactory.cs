@@ -13,7 +13,6 @@ namespace ErikTheCoder.Identity.Domain
         private readonly ICorrelationIdAccessor _correlationIdAccessor;
         private readonly ILoggedDatabase _database;
         private readonly IEmailSettings _emailSettings;
-        private readonly IdentityRecordFactory _recordFactory;
         private readonly PasswordManagerVersions _passwordManagerVersions;
 
 
@@ -23,7 +22,6 @@ namespace ErikTheCoder.Identity.Domain
             _correlationIdAccessor = CorrelationIdAccessor;
             _database = Database;
             _emailSettings = EmailSettings;
-            _recordFactory = new IdentityRecordFactory(_logger, _correlationIdAccessor, _database, ThreadsafeRandom, _emailSettings);
             _passwordManagerVersions = new PasswordManagerVersions(ThreadsafeRandom);
         }
 
@@ -32,7 +30,22 @@ namespace ErikTheCoder.Identity.Domain
         public virtual User CreateUser() => new User();
 
 
+        internal User CreateUser(UserRecord Record)
+        {
+            var user = CreateUser();
+            user.EmailAddress = Record.EmailAddress;
+            user.FirstName = Record.FirstName;
+            user.Id = Record.Id;
+            user.LastName = Record.LastName;
+            user.PasswordHash = Record.PasswordHash;
+            user.PasswordManagerVersion = Record.PasswordManagerVersion;
+            user.Salt = Record.Salt;
+            user.Username = Record.Username;
+            return user;
+        }
+
+
         // Create repository classes.
-        public virtual IIdentityRepository CreateIdentityRepository() => new IdentityRepository(_logger, _correlationIdAccessor, _database, _recordFactory, _passwordManagerVersions, _emailSettings);
+        public virtual IIdentityRepository CreateIdentityRepository() => new IdentityRepository(_logger, _correlationIdAccessor, _database, this, _passwordManagerVersions, _emailSettings);
     }
 }

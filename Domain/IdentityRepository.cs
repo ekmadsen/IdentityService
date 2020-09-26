@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.Common;
 using System.Net;
 using System.Net.Mail;
 using System.Threading.Tasks;
@@ -19,12 +20,12 @@ namespace ErikTheCoder.Identity.Domain
     internal class IdentityRepository : RepositoryBase, IIdentityRepository
     {
         private const int _passwordManagerVersion = 3;
-        private readonly IdentityRecordFactory _factory;
+        private readonly IdentityFactory _factory;
         private readonly PasswordManagerVersions _passwordManagerVersions;
         private readonly IEmailSettings _emailSettings;
 
 
-        public IdentityRepository(ILogger Logger, ICorrelationIdAccessor CorrelationIdAccessor, ILoggedDatabase Database, IdentityRecordFactory Factory, PasswordManagerVersions PasswordManagerVersions, IEmailSettings EmailSettings) :
+        public IdentityRepository(ILogger Logger, ICorrelationIdAccessor CorrelationIdAccessor, ILoggedDatabase Database, IdentityFactory Factory, PasswordManagerVersions PasswordManagerVersions, IEmailSettings EmailSettings) :
             base(Logger, CorrelationIdAccessor, Database)
         {
             _factory = Factory;
@@ -45,7 +46,7 @@ namespace ErikTheCoder.Identity.Domain
             var (connection, transaction, disposeDbResources) = await GetDbResourcesAsync();
             try
             {
-                var userRecord = await connection.QuerySingleOrDefaultAsync<UserRecord>(query, Request);
+                var userRecord = await connection.QuerySingleOrDefaultAsync<UserRecord>(query, Request, transaction);
                 if (userRecord == null)
                 {
                     Logger.Log(CorrelationId, $"{Request.Username} user not found.");
@@ -64,8 +65,8 @@ namespace ErikTheCoder.Identity.Domain
                 // Add roles and claims.
                 var user = _factory.CreateUser(userRecord);
                 // TODO: Execute roles and claims queries in one round-trip to SQL Server via Dapper's QueryMultiple method.
-                await AddRolesAsync(connection, user);
-                await AddClaimsAsync(connection, user);
+                await AddRolesAsync(connection, transaction, user);
+                await AddClaimsAsync(connection, transaction, user);
                 return user;
             }
             catch
@@ -84,7 +85,7 @@ namespace ErikTheCoder.Identity.Domain
         }
 
 
-        private async Task AddRolesAsync(IDbConnection Connection, User User)
+        private async Task AddRolesAsync(IDbConnection Connection, IDbTransaction Transaction, User User)
         {
             Logger.Log(CorrelationId, $"Adding roles to {User.Username} User object.");
             const string query = @"
@@ -94,7 +95,7 @@ namespace ErikTheCoder.Identity.Domain
                 inner join [Identity].Roles r on ur.RoleId = r.Id
                 where u.Id = @id
                 order by r.Name asc";
-            var roles = await Connection.QueryAsync<RoleRecord>(query, User);
+            var roles = await Connection.QueryAsync<RoleRecord>(query, User, Transaction);
             foreach (var role in roles)
             {
                 Logger.Log(CorrelationId, $"{role.Name} role");
@@ -103,7 +104,7 @@ namespace ErikTheCoder.Identity.Domain
         }
 
 
-        private async Task AddClaimsAsync(IDbConnection Connection, User User)
+        private async Task AddClaimsAsync(IDbConnection Connection, IDbTransaction Transaction, User User)
         {
             Logger.Log(CorrelationId, $"Adding claims to {User.Username} User object.");
             const string query = @"
@@ -113,7 +114,7 @@ namespace ErikTheCoder.Identity.Domain
                 inner join [Identity].Claims c on uc.ClaimId = c.Id
                 where u.Id = @id
                 order by c.[Type] asc, uc.[Value] asc";
-            var claims = await Connection.QueryAsync<ClaimRecord>(query, User);
+            var claims = await Connection.QueryAsync<ClaimRecord>(query, User, Transaction);
             foreach (var claim in claims)
             {
                 Logger.Log(CorrelationId, $"Type = {claim.Type}, Value = {claim.Value} claim");
@@ -158,7 +159,7 @@ namespace ErikTheCoder.Identity.Domain
                 output inserted.id
                 values (@username, 1, 0, @passwordManagerVersion, @salt, @passwordHash, @emailAddress, @firstName, @lastName)";
                 code = Guid.NewGuid().ToString();
-                var userId = (int) await connection.ExecuteScalarAsync(addUserQuery, addUserQueryParameters);
+                var userId = (int) await connection.ExecuteScalarAsync(addUserQuery, addUserQueryParameters, transaction);
                 // Add confirmation to database.
                 var confirmationParam = new
                 {
@@ -170,7 +171,7 @@ namespace ErikTheCoder.Identity.Domain
                 const string confirmationQuery = @"
                 insert into [Identity].UserConfirmations (UserId, EmailAddress, Code, Sent)
                 values (@userId, @emailAddress, @code, @sent)";
-                await connection.ExecuteAsync(confirmationQuery, confirmationParam);
+                await connection.ExecuteAsync(confirmationQuery, confirmationParam, transaction);
                 transaction?.TryCommit();
             }
             catch
